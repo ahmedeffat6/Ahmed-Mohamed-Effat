@@ -234,7 +234,6 @@
             position: relative; padding: 6rem 2rem 4rem; max-width: 1200px; margin: 0 auto;
         }
         .hero-content { max-width: 800px; z-index: 2; position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .terminal-inline { font-size: 0.85rem; color: var(--cyan); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; min-height: 1.5rem; flex-wrap: wrap; text-align: left; }
         .cursor { display: inline-block; width: 8px; height: 15px; background: var(--cyan); animation: blink 1s step-end infinite; margin-left: 5px; }
         @keyframes blink { 50% { opacity: 0; } }
 
@@ -559,7 +558,6 @@
             .hero-slogan { text-align: center; }
             #hero p { font-size: 1rem; text-align: center; }
             .hero-content { display: flex; flex-direction: column; align-items: center; justify-content: center;}
-            .terminal-inline { justify-content: center; }
             .hero-buttons { width: 100%; display: flex; flex-direction: column; gap: 0.5rem;}
             .btn { margin-right: 0; width: 100%; }
             .shield-bg-container { right: 50%; transform: translate(50%, -50%); height: 100vw; width: 100vw; opacity: 0.15; z-index: -1; }
@@ -702,10 +700,6 @@
         </div>
 
         <div class="hero-content">
-            <div class="terminal-inline mono">
-                <span id="hero-terminal-content"></span><span class="cursor"></span>
-            </div>
-
             <h1 class="hero-name orbitron-font reveal-left active">
                 <span class="glitch" data-text="AHMED MOHAMED">AHMED MOHAMED</span>
                 <span class="glitch" data-text="EFFAT">EFFAT</span>
@@ -1062,38 +1056,6 @@
                 if (open) { closeModal(open.id); if (open.id === 'mobile-menu') { menuToggle.classList.remove('active'); menuToggle.setAttribute('aria-expanded','false'); } }
             }
         });
-
-        /* ---------- HERO TERMINAL BOOT SEQUENCE ---------- */
-        const heroTerminal = document.getElementById('hero-terminal-content');
-        const bootLines = [
-            { t: '> AE-01 // SECURE SHELL v2.4.1', cls: '' },
-            { t: '> Establishing uplink to SIEM ......... ', cls: '', tag: '[OK]' },
-            { t: '> Mounting case files (4) ............ ', cls: '', tag: '[OK]' },
-            { t: '> Subscribing to threat feed ......... ', cls: '', tag: '[OK]' },
-            { t: 'SYSTEM STATUS: ONLINE // PROTOCOLS: ACTIVE', cls: 'text-cyan' }
-        ];
-        let bl = 0, bc = 0;
-        function typeBoot() {
-            if (bl >= bootLines.length) return;
-            const line = bootLines[bl];
-            if (bc === 0) {
-                const div = document.createElement('div');
-                div.className = 'boot-line mono ' + line.cls;
-                div.id = 'boot-line-' + bl;
-                heroTerminal.appendChild(div);
-            }
-            const el = document.getElementById('boot-line-' + bl);
-            if (bc < line.t.length) {
-                el.textContent += line.t.charAt(bc);
-                bc++;
-                setTimeout(typeBoot, prefersReducedMotion ? 0 : 28);
-            } else {
-                if (line.tag) el.innerHTML += ' <span class="text-emerald">' + line.tag + '</span>';
-                bl++; bc = 0;
-                setTimeout(typeBoot, prefersReducedMotion ? 0 : 220);
-            }
-        }
-        setTimeout(typeBoot, 900);
 
         /* ---------- BINARY RAIN ---------- */
         const rainGroup = document.getElementById('binary-rain-group');
