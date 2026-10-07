@@ -233,17 +233,19 @@
             min-height: 100vh; min-height: 100svh; display: flex; align-items: center;
             position: relative; padding: 6rem 2rem 4rem; max-width: 1200px; margin: 0 auto;
         }
-        .hero-content { max-width: 800px; z-index: 2; position: relative; width: 100%; }
-        .terminal-inline { font-size: 0.85rem; color: var(--cyan); margin-bottom: 1.5rem; display: flex; align-items: center; min-height: 1.5rem; flex-wrap: wrap;}
+        .hero-content { max-width: 800px; z-index: 2; position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .terminal-inline { font-size: 0.85rem; color: var(--cyan); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; min-height: 1.5rem; flex-wrap: wrap; text-align: left; }
         .cursor { display: inline-block; width: 8px; height: 15px; background: var(--cyan); animation: blink 1s step-end infinite; margin-left: 5px; }
         @keyframes blink { 50% { opacity: 0; } }
 
         .hero-name {
             font-size: clamp(2.4rem, 7vw, 3.8rem); margin-bottom: 0.5rem; line-height: 1.1;
-            font-weight: 900; text-shadow: 0 0 20px rgba(0,0,0,0.8);
-            display: flex; flex-direction: column; align-items: flex-start; width: fit-content;
+            font-weight: 900;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            width: 100%; max-width: 800px;
         }
         .hero-name span { position: relative; }
+        body.dark-mode .hero-name { text-shadow: 0 0 20px rgba(0,0,0,0.8); }
 
         /* Glitch effect on hero name */
         .glitch { position: relative; }
@@ -266,8 +268,15 @@
             98% { opacity: 0.8; transform: translateX(2px); clip-path: inset(35% 0 35% 0); }
         }
 
-        .hero-slogan { font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: 1.5rem; line-height: 1.3; font-weight: 700; border: none; padding-bottom: 0; text-shadow: 0 0 15px rgba(0,0,0,0.8); }
-        #hero p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        .hero-slogan { font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: 1.5rem; line-height: 1.3; font-weight: 700; border: none; padding-bottom: 0; text-align: center; }
+        body.dark-mode .hero-slogan { text-shadow: 0 0 15px rgba(0,0,0,0.8); }
+        #hero p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; text-align: center; }
+        body.dark-mode #hero p { text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+
+        /* Light mode: replace the dark halo with a soft light glow — placed after so it wins */
+        body.light-mode .hero-name,
+        body.light-mode .hero-slogan,
+        body.light-mode #hero p { text-shadow: 0 1px 3px rgba(255,255,255,0.6); }
 
         .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
         .scroll-hint { position: absolute; bottom: 1.6rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.4rem; font-family: 'Fira Code', monospace; font-size: 0.65rem; letter-spacing: 2px; color: var(--text-muted); z-index: 2; }
@@ -429,10 +438,10 @@
         .footer-bottom { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 1px; }
 
         /* Reveal-on-scroll animations */
-        .reveal-up { opacity: 0; transform: translateY(40px); transition: all 0.8s var(--ease-smooth); }
-        .reveal-left { opacity: 0; transform: translateX(-40px); transition: all 0.8s var(--ease-smooth); }
-        .reveal-right { opacity: 0; transform: translateX(40px); transition: all 0.8s var(--ease-smooth); }
-        .reveal-scale { opacity: 0; transform: scale(0.9); transition: all 0.8s var(--ease-smooth); }
+        .reveal-up { opacity: 0; transform: translateY(40px); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
+        .reveal-left { opacity: 0; transform: translateX(-40px); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
+        .reveal-right { opacity: 0; transform: translateX(40px); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
+        .reveal-scale { opacity: 0; transform: scale(0.9); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
         .active { opacity: 1 !important; transform: translate(0) scale(1) !important; }
         .grid > div:nth-child(1) { transition-delay: 0.1s; }
         .grid > div:nth-child(2) { transition-delay: 0.2s; }
@@ -546,7 +555,7 @@
         @media (max-width: 768px) {
             .container { padding: 3rem 1.5rem; }
             h2 { font-size: 1.8rem; margin-bottom: 1.5rem; }
-            .hero-name { align-items: center; text-align: center; margin: 0 auto 0.5rem auto; }
+            .hero-name { margin: 0 auto 0.5rem auto; }
             .hero-slogan { text-align: center; }
             #hero p { font-size: 1rem; text-align: center; }
             .hero-content { display: flex; flex-direction: column; align-items: center; justify-content: center;}
@@ -1013,8 +1022,10 @@
         const themeBtn = document.getElementById('theme-toggle');
         const savedTheme = localStorage.getItem('portfolio-theme');
         if (savedTheme === 'light') document.body.classList.add('light-mode');
+        else document.body.classList.add('dark-mode');   // dark is the default
         themeBtn.addEventListener('click', () => {
             const isLight = document.body.classList.toggle('light-mode');
+            document.body.classList.toggle('dark-mode', !isLight);
             localStorage.setItem('portfolio-theme', isLight ? 'light' : 'dark');
             toast(isLight ? '> THEME: LIGHT MODE ENGAGED' : '> THEME: DARK MODE ENGAGED');
             document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#F3F4F6' : '#070A0F');
