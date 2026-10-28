@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,31 @@
     <meta property="og:type" content="website">
     <title>Ahmed Effat // SOC Analyst Portfolio</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L4 5v6c0 5 3.4 9.5 8 11 4.6-1.5 8-6 8-11V5l-8-3z' fill='none' stroke='%2300E5FF' stroke-width='2'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <script>
+        // Runs before paint: enables reveal animations only when JS works, and skips the boot screen on repeat visits
+        (function () {
+            var d = document.documentElement;
+            d.classList.remove('no-js'); d.classList.add('js');
+            try { if (sessionStorage.getItem('ae-booted')) d.classList.add('booted'); } catch (e) {}
+        })();
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ahmed Mohamed Effat",
+        "jobTitle": "SOC Analyst",
+        "knowsAbout": ["Security Operations", "Network Forensics", "SIEM", "Incident Response", "Threat Detection"],
+        "sameAs": [
+            "https://github.com/ahmedeffat6",
+            "https://linkedin.com/in/ahmed-mohammed-2e2",
+            "https://tryhackme.com/p/3ffat0x"
+        ]
+    }
+    </script>
 
     <style>
         /* =========================================
@@ -21,6 +45,7 @@
             --bg-dark: #070A0F;
             --bg-panel: #11161F;
             --bg-navy: #0D1219;
+            --panel-glass: rgba(17, 22, 31, 0.85);
             --cyan: #00E5FF;
             --emerald: #10B981;
             --thm-red: #BF2A2D;
@@ -30,6 +55,10 @@
             --nav-bg: rgba(7, 10, 15, 0.85);
             --modal-bg: rgba(10, 14, 23, 0.9);
             --glow-cyan: rgba(0, 229, 255, 0.4);
+            --sev-crit: #F87171;
+            --sev-high: #FB923C;
+            --sev-med: #FACC15;
+            --sev-low: #10B981;
             --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
@@ -37,6 +66,7 @@
             --bg-dark: #F3F4F6;
             --bg-panel: #FFFFFF;
             --bg-navy: #E5E7EB;
+            --panel-glass: rgba(255, 255, 255, 0.85);
             --cyan: #008394;
             --emerald: #059669;
             --thm-red: #D32F2F;
@@ -60,6 +90,7 @@
             overflow-x: hidden;
             transition: background-color 0.5s ease, color 0.5s ease;
         }
+        body.modal-open { overflow: hidden; }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 9px; height: 9px; }
@@ -74,10 +105,15 @@
         :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 3px; }
         a:focus-visible, button:focus-visible { outline-offset: 4px; }
 
+        .skip-link {
+            position: fixed; top: -100px; left: 1rem; z-index: 10001; background: var(--cyan); color: #05070A;
+            padding: 0.6rem 1rem; font-family: 'Fira Code', monospace; font-size: 0.8rem; text-decoration: none; border-radius: 3px;
+        }
+        .skip-link:focus { top: 1rem; }
+
         /* =========================================
            SOC ANIMATED BACKGROUND
            ========================================= */
-        /* Interactive hexagon honeycomb canvas background */
         #hex-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: -2; pointer-events: none; display: block;
@@ -125,14 +161,17 @@
         /* Custom cyber cursor */
         .cursor-dot, .cursor-ring {
             position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9992;
-            border-radius: 50%; will-change: transform;
+            border-radius: 50%; will-change: transform; opacity: 0;
         }
+        html.has-cursor .cursor-dot, html.has-cursor .cursor-ring { opacity: 1; }
+        html.has-cursor, html.has-cursor * { cursor: none !important; }
         .cursor-dot { width: 6px; height: 6px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
         .cursor-ring {
-            width: 34px; height: 34px; border: 1.5px solid var(--cyan); opacity: 0.6;
-            transition: width 0.25s var(--ease-smooth), height 0.25s var(--ease-smooth), opacity 0.25s, border-color 0.25s;
+            width: 34px; height: 34px; border: 1.5px solid var(--cyan);
+            transition: width 0.25s var(--ease-smooth), height 0.25s var(--ease-smooth), border-color 0.25s;
         }
-        .cursor-ring.hovering { width: 56px; height: 56px; opacity: 1; border-color: var(--emerald); }
+        html.has-cursor .cursor-ring { opacity: 0.6; }
+        html.has-cursor .cursor-ring.hovering { width: 56px; height: 56px; opacity: 1; border-color: var(--emerald); }
         @media (hover: none), (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } }
 
         /* Boot screen */
@@ -141,7 +180,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
             transition: opacity 0.6s ease, visibility 0.6s ease;
         }
-        #boot-screen.hidden { opacity: 0; visibility: hidden; }
+        #boot-screen.hidden, .booted #boot-screen, .no-js #boot-screen { opacity: 0; visibility: hidden; }
         .boot-logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: clamp(1.4rem, 4vw, 2.2rem); color: var(--cyan); letter-spacing: 4px; text-shadow: 0 0 20px var(--glow-cyan); }
         .boot-bar { width: min(260px, 60vw); height: 3px; background: var(--border-color); overflow: hidden; border-radius: 2px; }
         .boot-bar span { display: block; height: 100%; width: 40%; background: linear-gradient(90deg, transparent, var(--cyan), transparent); animation: bootScan 1s linear infinite; }
@@ -152,23 +191,25 @@
         h1, h2, .orbitron-font { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 1px; color: var(--text-main); }
         .section-sig { font-family: 'Fira Code', monospace; color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; display: block; letter-spacing: 2px; opacity: 0.8; }
         h2 { font-size: 2.2rem; margin-bottom: 2.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; display: inline-block; }
+        .section-lede { margin: -1.5rem 0 2rem; font-size: 0.85rem; }
         .mono { font-family: 'Fira Code', monospace; }
         .text-cyan { color: var(--cyan); }
         .text-emerald { color: var(--emerald); }
         .text-muted { color: var(--text-muted); }
         .container { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; position: relative; z-index: 10; }
         section[id], footer[id] { scroll-margin-top: 90px; }
+        kbd { border: 1px solid var(--border-color); border-radius: 3px; padding: 0.1rem 0.35rem; font-size: 0.7rem; font-family: 'Fira Code', monospace; }
 
         /* NAVIGATION */
-        nav {
+        nav#main-nav {
             position: fixed; top: 0; width: 100%; padding: 1.2rem 2rem;
             display: flex; justify-content: space-between; align-items: center;
             z-index: 100; background: var(--nav-bg); backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color); transition: background 0.5s ease, padding 0.3s ease;
         }
-        nav.scrolled { padding: 0.8rem 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        nav#main-nav.scrolled { padding: 0.8rem 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .logo-sig { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--cyan); letter-spacing: 2px; font-size: 1.2rem; text-decoration: none; }
-        .nav-links { display: flex; gap: 1.8rem; align-items: center; }
+        .nav-links { display: flex; gap: 1.6rem; align-items: center; }
         .nav-links a {
             font-family: 'Fira Code', monospace; font-size: 0.78rem; letter-spacing: 1.5px;
             color: var(--text-muted); text-decoration: none; text-transform: uppercase; position: relative; transition: color 0.3s;
@@ -177,11 +218,16 @@
             content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 1.5px;
             background: var(--cyan); box-shadow: 0 0 6px var(--cyan); transition: width 0.3s var(--ease-smooth);
         }
-        .nav-links a:hover { color: var(--cyan); }
-        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.current { color: var(--cyan); }
+        .nav-links a:hover::after, .nav-links a.current::after { width: 100%; }
         #utc-clock { font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 1px; border: 1px solid var(--border-color); padding: 0.3rem 0.6rem; border-radius: 3px; }
         #utc-clock b { color: var(--emerald); font-weight: 500; }
         .nav-controls { display: flex; gap: 0.9rem; align-items: center; }
+        .palette-trigger {
+            background: transparent; border: 1px solid var(--border-color); border-radius: 3px; color: var(--text-muted);
+            font-family: 'Fira Code', monospace; font-size: 0.7rem; padding: 0.3rem 0.55rem; cursor: pointer; transition: 0.3s;
+        }
+        .palette-trigger:hover { border-color: var(--cyan); color: var(--cyan); }
 
         .cyber-orb {
             width: 45px; height: 45px; background: transparent; border: none;
@@ -205,9 +251,17 @@
         /* Mobile menu toggle */
         #menu-toggle { display: none; background: transparent; border: 1px solid var(--border-color); border-radius: 4px; width: 40px; height: 40px; cursor: pointer; flex-direction: column; gap: 5px; align-items: center; justify-content: center; }
         #menu-toggle span { display: block; width: 18px; height: 2px; background: var(--cyan); transition: 0.3s var(--ease-smooth); }
-        #menu-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        #menu-toggle.active span:nth-child(2) { opacity: 0; }
-        #menu-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        #menu-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        #menu-toggle.open span:nth-child(2) { opacity: 0; }
+        #menu-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-links { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; }
+        .mobile-links a {
+            font-family: 'Orbitron', sans-serif; font-size: 1.05rem; letter-spacing: 2px; color: var(--text-main);
+            text-decoration: none; padding: 0.8rem 0.5rem; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .mobile-links a span { color: var(--cyan); font-family: 'Fira Code', monospace; font-size: 0.75rem; }
 
         /* Buttons */
         .btn {
@@ -226,6 +280,8 @@
         .btn:hover { background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 15px var(--glow-cyan); text-shadow: 0 0 5px var(--cyan); }
         .btn-secondary { border-color: var(--text-main); color: var(--text-main); }
         .btn-secondary:hover { border-color: var(--emerald); color: var(--emerald); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); text-shadow: 0 0 5px var(--emerald); }
+        body.light-mode .btn { background: rgba(255,255,255,0.5); }
+
         /* =========================================
            1. HERO SECTION (COVER)
            ========================================= */
@@ -234,8 +290,19 @@
             position: relative; padding: 6rem 2rem 4rem; max-width: 1200px; margin: 0 auto;
         }
         .hero-content { max-width: 560px; z-index: 2; position: relative; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; }
-        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--cyan); animation: blink 1s step-end infinite; margin-left: 5px; }
+        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--cyan); animation: blink 1s step-end infinite; margin-left: 5px; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
+
+        .hero-in { animation: heroIn 0.9s var(--ease-smooth) both; }
+        @keyframes heroIn { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 0.55rem; font-family: 'Fira Code', monospace; font-size: 0.72rem;
+            letter-spacing: 1.5px; color: var(--emerald); border: 1px solid rgba(16,185,129,0.35);
+            background: rgba(16,185,129,0.08); padding: 0.35rem 0.85rem; border-radius: 999px; margin-bottom: 1.4rem;
+        }
+        .status-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); animation: ping 1.8s infinite; }
+        @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); } 100% { box-shadow: 0 0 0 10px rgba(16,185,129,0); } }
 
         .hero-name {
             font-size: clamp(2.4rem, 7vw, 3.8rem); margin-bottom: 0.5rem; line-height: 1.1;
@@ -271,8 +338,8 @@
         body.dark-mode .hero-slogan { text-shadow: 0 0 15px rgba(0,0,0,0.8); }
         #hero p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; text-align: left; }
         body.dark-mode #hero p { text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        #role-rotator { color: var(--text-main); }
 
-        /* Light mode: replace the dark halo with a soft light glow — placed after so it wins */
         body.light-mode .hero-name,
         body.light-mode .hero-slogan,
         body.light-mode #hero p { text-shadow: 0 1px 3px rgba(255,255,255,0.6); }
@@ -288,13 +355,15 @@
             z-index: 0; pointer-events: none; transition: 0.5s ease;
             display: flex; justify-content: center; align-items: center;
         }
-        .shield-bg-container svg { width: 100%; height: 100%; object-fit: contain; overflow: visible; }
+        .shield-bg-container svg { width: 100%; height: 100%; overflow: visible; }
         .radar-sweep { transform-box: view-box; transform-origin: 400px 440px; animation: radarSpin 5s linear infinite; }
         @keyframes radarSpin { 100% { transform: rotate(360deg); } }
         .orbit-ring { transform-box: view-box; transform-origin: 400px 440px; }
         .orbit-ring.r1 { animation: orbitSpin 24s linear infinite; }
         .orbit-ring.r2 { animation: orbitSpin 38s linear infinite reverse; }
         @keyframes orbitSpin { 100% { transform: rotate(360deg); } }
+        .radar-blip { animation: blip 5s linear infinite; opacity: 0; }
+        @keyframes blip { 0%, 100% { opacity: 0; } 8% { opacity: 1; } 40% { opacity: 0; } }
 
         @keyframes fall { 0% { transform: translateY(-150px); } 100% { transform: translateY(850px); } }
         @keyframes pulse-line { 0%, 100% { opacity: 0.2; stroke-width: 1; } 50% { opacity: 0.8; stroke-width: 3; filter: url(#neon-glow); } }
@@ -302,6 +371,15 @@
         .electric-line:nth-child(1) { animation-delay: 0s; } .electric-line:nth-child(2) { animation-delay: 0.5s; }
         .electric-line:nth-child(3) { animation-delay: 1s; } .electric-line:nth-child(4) { animation-delay: 1.5s; }
         .electric-line:nth-child(5) { animation-delay: 2s; } .electric-line:nth-child(6) { animation-delay: 2.5s; }
+
+        /* =========================================
+           STATS STRIP
+           ========================================= */
+        #stats { padding-top: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .stat { text-align: center; padding: 1.4rem 1rem !important; }
+        .stat-num { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: clamp(1.5rem, 3.5vw, 2.3rem); color: var(--cyan); text-shadow: 0 0 18px var(--glow-cyan); line-height: 1.1; font-variant-numeric: tabular-nums; }
+        .stat-label { font-family: 'Fira Code', monospace; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 1px; margin-top: 0.5rem; text-transform: uppercase; }
 
         /* =========================================
            2. ABOUT & PHOTO
@@ -317,42 +395,58 @@
             box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
         }
         @keyframes gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .cyber-photo-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; background-color: var(--bg-navy); }
+        .cyber-photo-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; background-color: var(--bg-navy); display: block; }
+        .cyber-photo-frame.no-photo::after {
+            content: 'AE'; position: absolute; inset: 3px; border-radius: 6px; background: var(--bg-navy);
+            display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif;
+            font-weight: 900; font-size: 3rem; color: var(--cyan); text-shadow: 0 0 20px var(--glow-cyan);
+        }
         .thinking-box { border-left: 2px solid var(--cyan); padding-left: 1.5rem; flex-grow: 1;}
         .thinking-box ul { list-style: none; margin-bottom: 0.5rem; }
         .thinking-box li { font-family: 'Fira Code', monospace; color: var(--text-main); font-size: 0.85rem; }
         .thinking-box blockquote { color: var(--text-muted); font-style: italic; font-size: 0.9rem;}
 
+        /* Interactive terminal */
         .terminal-box {
-            background: #11161F; border: 1px solid rgba(0, 229, 255, 0.2); padding: 1.5rem;
-            border-radius: 6px; font-size: 0.85rem; color: #00E5FF;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); width: 100%; backdrop-filter: blur(10px);
+            background: #0B0F16; border: 1px solid rgba(0, 229, 255, 0.2); padding: 1.5rem;
+            border-radius: 6px; font-size: 0.82rem; color: #00E5FF;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(0,229,255,0.03); width: 100%;
         }
-        body.light-mode .terminal-box { background: #0B0F16; color: #00E5FF; }
-        .terminal-header { border-bottom: 1px solid #2D3748; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 0.75rem; color: #9CA3AF; display: flex; justify-content: space-between; }
-        .terminal-line { min-height: 1.2rem; margin-bottom: 0.4rem; }
+        .terminal-header { border-bottom: 1px solid #2D3748; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 0.75rem; color: #9CA3AF; display: flex; justify-content: space-between; align-items: center; }
+        .term-dots { display: inline-flex; gap: 6px; margin-right: 0.7rem; vertical-align: middle; }
+        .term-dots i { width: 10px; height: 10px; border-radius: 50%; background: #374151; }
+        .term-dots i:nth-child(1) { background: #F87171; } .term-dots i:nth-child(2) { background: #FACC15; } .term-dots i:nth-child(3) { background: #10B981; }
+        .term-out { height: 260px; overflow-y: auto; scrollbar-width: thin; }
+        .term-line { white-space: pre-wrap; word-break: break-word; margin-bottom: 0.3rem; min-height: 1.1rem; }
+        .term-line.cmd { color: #00E5FF; }
+        .term-line.dim { color: #9CA3AF; }
+        .term-line.ok { color: #10B981; }
+        .term-line.err { color: #F87171; }
+        .term-input-row { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.7rem; border-top: 1px dashed #2D3748; padding-top: 0.7rem; }
+        .term-prompt { color: #10B981; white-space: nowrap; }
+        #term-input { flex: 1; background: transparent; border: none; outline: none; color: #E5F9FF; font: inherit; caret-color: #00E5FF; min-width: 0; }
+        #term-input::placeholder { color: #4B5563; }
+        .term-input-row:focus-within { border-top-color: rgba(0,229,255,0.5); }
+        .term-hint { font-size: 0.68rem; color: #6B7280; margin-top: 0.5rem; }
+        .term-hint b { color: #00E5FF; font-weight: 500; }
 
         /* =========================================
            CARDS — ROTATING GLOW, SPOTLIGHT, TILT
            ========================================= */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
 
         .glow-card {
             position: relative; padding: 1.5rem; border-radius: 6px; z-index: 1;
-            background: rgba(17, 22, 31, 0.85); backdrop-filter: blur(10px);
-            overflow: hidden; transition: transform 0.18s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            background: var(--panel-glass); backdrop-filter: blur(10px);
+            overflow: hidden; transition: transform 0.18s ease, box-shadow 0.3s ease, border-color 0.3s ease, opacity 0.8s var(--ease-smooth);
             border: 1px solid var(--border-color); transform-style: preserve-3d; will-change: transform;
         }
-        body.light-mode .glow-card { background: rgba(255, 255, 255, 0.85); }
-
-        /* Cursor-tracking spotlight */
         .glow-card::before {
             content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
             background: radial-gradient(circle 220px at var(--mx, 50%) var(--my, 50%), rgba(0, 229, 255, 0.14), transparent 60%);
             opacity: 0; transition: opacity 0.3s ease;
         }
         .glow-card:hover::before { opacity: 1; }
-
         .glow-card::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: conic-gradient(transparent, var(--cyan), transparent 30%);
@@ -380,16 +474,17 @@
 
         .tool-meta { font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.8rem; }
         .tool-data { font-size: 0.9rem; color: var(--text-main); }
-        .case-id { font-family: 'Fira Code', monospace; color: var(--cyan); font-size: 0.75rem; margin-bottom: 0.5rem; }
+        .case-id { font-family: 'Fira Code', monospace; color: var(--cyan); font-size: 0.75rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; gap: 1rem; }
+        .case-id .sev { font-size: 0.68rem; letter-spacing: 1px; }
         .project-card { cursor: pointer; }
         .project-card .click-hint { font-size: 0.8rem; margin-top: 1rem; color: var(--cyan); font-family: 'Fira Code', monospace; transition: transform 0.3s var(--ease-smooth); }
         .project-card:hover .click-hint { transform: translateX(6px); }
+        .card-mitre { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.8rem; }
 
         /* =========================================
            TIMELINES & BANNERS
            ========================================= */
-        .timeline-wrapper { background: rgba(17, 22, 31, 0.85); backdrop-filter: blur(10px); padding: 2rem; border-radius: 6px; border: 1px solid var(--border-color); position: relative; overflow: hidden; transition: 0.5s ease; }
-        body.light-mode .timeline-wrapper { background: rgba(255, 255, 255, 0.85); }
+        .timeline-wrapper { background: var(--panel-glass); backdrop-filter: blur(10px); padding: 2rem; border-radius: 6px; border: 1px solid var(--border-color); position: relative; overflow: hidden; transition: 0.5s ease; }
 
         .timeline-item { margin-bottom: 1.5rem; border-left: 2px solid var(--border-color); padding-left: 1.5rem; position: relative; }
         .timeline-item:last-child { margin-bottom: 0; border-left-color: transparent; }
@@ -403,6 +498,94 @@
         .inv-item strong { display: block; color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.95rem; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
         .inv-item span { display: inline-block; padding: 0.2rem 0.5rem; border: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-muted); margin: 0 0.2rem 0.4rem 0; border-radius: 3px; transition: 0.3s; cursor: default; font-family: 'Fira Code', monospace; }
         .inv-item span:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+        /* =========================================
+           MITRE ATT&CK MATRIX
+           ========================================= */
+        .mitre-matrix { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.75rem; }
+        .mitre-col { display: flex; flex-direction: column; gap: 0.5rem; }
+        .mitre-tactic {
+            font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;
+            padding: 0.75rem 0.65rem; border-bottom: 2px solid var(--cyan); background: var(--panel-glass);
+            border-radius: 4px 4px 0 0; min-height: 4.2rem; display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .mitre-tactic span { display: block; font-family: 'Fira Code', monospace; color: var(--text-muted); font-size: 0.65rem; margin-top: 0.2rem; letter-spacing: 0.5px; }
+        .mitre-tech {
+            display: block; width: 100%; text-align: left; font: inherit; font-size: 0.82rem; line-height: 1.35; color: var(--text-main); cursor: pointer;
+            padding: 0.75rem 0.7rem; border: 1px solid var(--border-color); border-radius: 4px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.16), rgba(16,185,129,0.06)), var(--panel-glass);
+            transition: transform 0.25s var(--ease-smooth), border-color 0.25s, box-shadow 0.25s;
+        }
+        .mitre-tech b { display: block; font-family: 'Fira Code', monospace; font-weight: 500; color: var(--cyan); font-size: 0.72rem; margin-bottom: 0.15rem; }
+        .mitre-tech em { display: block; font-style: normal; font-family: 'Fira Code', monospace; font-size: 0.65rem; color: var(--emerald); margin-top: 0.4rem; }
+        .mitre-tech:hover, .mitre-tech:focus-visible { border-color: var(--cyan); box-shadow: 0 0 14px var(--glow-cyan); transform: translateY(-2px); }
+        .mitre-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.2rem; font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-muted); }
+        .mitre-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 0.4rem; background: linear-gradient(135deg, rgba(0,229,255,0.5), rgba(16,185,129,0.3)); border: 1px solid var(--cyan); }
+
+        /* =========================================
+           SOC CONSOLE — LIVE FEED + TRIAGE
+           ========================================= */
+        .console-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; align-items: stretch; }
+        .panel {
+            background: #0B0F16; border: 1px solid rgba(0,229,255,0.2); border-radius: 6px; padding: 1.2rem;
+            color: #E5E7EB; box-shadow: 0 10px 30px rgba(0,0,0,0.45); display: flex; flex-direction: column; min-width: 0;
+        }
+        .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-family: 'Fira Code', monospace; font-size: 0.72rem; color: #9CA3AF; letter-spacing: 1px; border-bottom: 1px solid #2D3748; padding-bottom: 0.6rem; margin-bottom: 0.9rem; }
+        .panel-head .live { color: #10B981; }
+        .panel-head .live.paused { color: #FACC15; }
+        .feed-toggle { background: transparent; border: 1px solid #2D3748; color: #9CA3AF; font: inherit; font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 3px; cursor: pointer; }
+        .feed-toggle:hover { border-color: #00E5FF; color: #00E5FF; }
+        .sev-counters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.9rem; }
+        .sev-c { border: 1px solid #1F2937; border-radius: 4px; padding: 0.45rem 0.3rem; text-align: center; font-family: 'Fira Code', monospace; font-size: 0.6rem; color: #9CA3AF; letter-spacing: 1px; }
+        .sev-c b { display: block; font-size: 1.1rem; font-weight: 500; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+        .sev-c.crit b { color: var(--sev-crit); } .sev-c.high b { color: var(--sev-high); }
+        .sev-c.med b { color: var(--sev-med); } .sev-c.low b { color: var(--sev-low); }
+        .feed { list-style: none; height: 340px; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.72rem; display: flex; flex-direction: column; gap: 0.4rem; position: relative; }
+        .feed::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: linear-gradient(transparent, #0B0F16); pointer-events: none; }
+        .feed li { padding: 0.5rem 0.65rem; border: 1px solid #1F2937; border-left: 3px solid var(--sc); border-radius: 3px; background: rgba(255,255,255,0.02); animation: feedIn 0.45s var(--ease-smooth); flex-shrink: 0; }
+        .feed .row1 { display: flex; gap: 0.6rem; align-items: baseline; min-width: 0; }
+        .feed .t { color: #6B7280; flex-shrink: 0; }
+        .feed .s { color: var(--sc); font-weight: 500; flex-shrink: 0; min-width: 4.6em; }
+        .feed .r { color: #E5E7EB; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .feed .row2 { display: flex; gap: 0.8rem; color: #6B7280; font-size: 0.66rem; margin-top: 0.15rem; flex-wrap: wrap; }
+        .feed .row2 .m { color: #00E5FF; }
+        .feed .row2 .st { margin-left: auto; color: #9CA3AF; }
+        .feed .row2 .st.esc { color: var(--sev-crit); }
+        @keyframes feedIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+        .panel-foot { font-family: 'Fira Code', monospace; font-size: 0.65rem; color: #6B7280; margin-top: 0.7rem; }
+
+        .triage-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+        .sev-badge { font-family: 'Fira Code', monospace; font-size: 0.66rem; letter-spacing: 1px; padding: 0.15rem 0.5rem; border-radius: 3px; border: 1px solid currentColor; }
+        .sev-badge.CRITICAL { color: var(--sev-crit); } .sev-badge.HIGH { color: var(--sev-high); }
+        .sev-badge.MEDIUM { color: var(--sev-med); } .sev-badge.LOW { color: var(--sev-low); }
+        .triage-src { font-family: 'Fira Code', monospace; font-size: 0.68rem; color: #6B7280; }
+        .triage-rule { font-family: 'Orbitron', sans-serif; font-size: 1rem; letter-spacing: 0.5px; margin: 0.7rem 0 0.2rem; color: #FFFFFF; line-height: 1.35; }
+        .evidence { list-style: none; font-family: 'Fira Code', monospace; font-size: 0.74rem; background: rgba(0,0,0,0.35); border: 1px solid #1F2937; border-radius: 4px; padding: 0.8rem 1rem; margin: 0.8rem 0 1rem; color: #D1D5DB; }
+        .evidence li { padding: 0.2rem 0; display: flex; gap: 0.5rem; }
+        .evidence li::before { content: '›'; color: #00E5FF; flex-shrink: 0; }
+        .triage-q { font-size: 0.85rem; color: #9CA3AF; margin-bottom: 0.7rem; }
+        .triage-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .tri-btn { flex: 1; min-width: 140px; font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; padding: 0.8rem 0.6rem; border-radius: 3px; cursor: pointer; background: transparent; transition: 0.25s; }
+        .tri-btn.esc { border: 1px solid var(--sev-crit); color: var(--sev-crit); }
+        .tri-btn.esc:hover:not(:disabled) { background: rgba(248,113,113,0.12); box-shadow: 0 0 12px rgba(248,113,113,0.3); }
+        .tri-btn.cls { border: 1px solid #10B981; color: #10B981; }
+        .tri-btn.cls:hover:not(:disabled) { background: rgba(16,185,129,0.12); box-shadow: 0 0 12px rgba(16,185,129,0.3); }
+        .tri-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .tri-btn.picked { opacity: 1; }
+        .tri-result { margin-top: 0.9rem; padding: 0.8rem 1rem; border-radius: 4px; font-size: 0.84rem; line-height: 1.55; display: none; color: #D1D5DB; }
+        .tri-result.show { display: block; animation: feedIn 0.4s var(--ease-smooth); }
+        .tri-result.right { border: 1px solid rgba(16,185,129,0.45); background: rgba(16,185,129,0.08); }
+        .tri-result.wrong { border: 1px solid rgba(248,113,113,0.45); background: rgba(248,113,113,0.08); }
+        .tri-result strong { font-family: 'Fira Code', monospace; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 0.3rem; }
+        .tri-result.right strong { color: #10B981; } .tri-result.wrong strong { color: var(--sev-crit); }
+        .tri-foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 1rem; font-family: 'Fira Code', monospace; font-size: 0.72rem; color: #9CA3AF; gap: 1rem; }
+        .tri-next { background: transparent; border: 1px solid #00E5FF; color: #00E5FF; font: inherit; padding: 0.4rem 0.9rem; border-radius: 3px; cursor: pointer; visibility: hidden; }
+        .tri-next.show { visibility: visible; }
+        .tri-next:hover { box-shadow: 0 0 10px rgba(0,229,255,0.4); }
+        .tri-progress { display: flex; gap: 4px; }
+        .tri-progress i { width: 18px; height: 4px; border-radius: 2px; background: #1F2937; }
+        .tri-progress i.right { background: #10B981; } .tri-progress i.wrong { background: var(--sev-crit); } .tri-progress i.cur { background: #00E5FF; }
+
         /* =========================================
            FOOTER & GLASSMORPHISM SOCIAL LOGOS
            ========================================= */
@@ -423,7 +606,6 @@
         }
         .social-link svg { width: 32px; height: 32px; fill: var(--text-main); color: var(--text-main); transition: all 0.4s ease; opacity: 0.8; }
         body.light-mode .social-link { background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.1); }
-        body.light-mode .social-link svg { fill: var(--text-main); color: var(--text-main); }
 
         .social-link.linkedin:hover { transform: translateY(-5px); border-color: var(--cyan); box-shadow: 0 10px 25px rgba(0, 229, 255, 0.2); }
         .social-link.linkedin:hover svg { fill: var(--cyan); opacity: 1; filter: drop-shadow(0 0 5px var(--cyan)); transform: scale(1.1); }
@@ -436,16 +618,18 @@
 
         .footer-bottom { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 1px; }
 
-        /* Reveal-on-scroll animations */
-        .reveal-up { opacity: 0; transform: translateY(40px); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
-        .reveal-left { opacity: 0; transform: translateX(-40px); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
-        .reveal-right { opacity: 0; transform: translateX(40px); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
-        .reveal-scale { opacity: 0; transform: scale(0.9); transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
-        .active { opacity: 1 !important; transform: translate(0) scale(1) !important; }
-        .grid > div:nth-child(1) { transition-delay: 0.1s; }
-        .grid > div:nth-child(2) { transition-delay: 0.2s; }
-        .grid > div:nth-child(3) { transition-delay: 0.3s; }
-        .grid > div:nth-child(4) { transition-delay: 0.4s; }
+        /* Reveal-on-scroll animations (only hidden when JS is running) */
+        .reveal-up, .reveal-left, .reveal-right, .reveal-scale { transition: opacity 0.8s var(--ease-smooth), transform 0.8s var(--ease-smooth); }
+        .js .reveal-up { opacity: 0; transform: translateY(40px); }
+        .js .reveal-left { opacity: 0; transform: translateX(-40px); }
+        .js .reveal-right { opacity: 0; transform: translateX(40px); }
+        .js .reveal-scale { opacity: 0; transform: scale(0.9); }
+        .js .is-visible { opacity: 1; transform: none; }
+        .grid > div:nth-child(1), .stats-grid > div:nth-child(1) { transition-delay: 0.1s; }
+        .grid > div:nth-child(2), .stats-grid > div:nth-child(2) { transition-delay: 0.2s; }
+        .grid > div:nth-child(3), .stats-grid > div:nth-child(3) { transition-delay: 0.3s; }
+        .grid > div:nth-child(4), .stats-grid > div:nth-child(4) { transition-delay: 0.4s; }
+        .glow-card.is-visible:hover { transition-delay: 0s; }
 
         /* =========================================
            MODALS
@@ -453,21 +637,30 @@
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--modal-bg); backdrop-filter: blur(8px);
-            z-index: 1000; display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.4s ease;
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.35s ease, visibility 0.35s ease;
         }
-        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
         .modal-content {
             background: var(--bg-panel); border: 1px solid var(--cyan); border-radius: 6px;
             padding: 2.5rem; width: 95%; max-width: 700px; position: relative;
             transform: scale(0.95) translateY(10px); transition: transform 0.4s var(--ease-smooth);
             max-height: 90vh; overflow-y: auto; box-shadow: 0 0 40px var(--glow-cyan);
         }
-        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
-        .close-modal { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
+        .modal-overlay.open .modal-content { transform: scale(1) translateY(0); }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: 0.3s; line-height: 1; padding: 0.2rem 0.4rem; }
         .close-modal:hover { color: var(--cyan); transform: rotate(90deg); }
 
-        .case-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+        .case-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0 0.2rem; }
+        .chip { font-family: 'Fira Code', monospace; font-size: 0.68rem; padding: 0.2rem 0.55rem; border-radius: 3px; border: 1px solid var(--border-color); color: var(--text-muted); white-space: nowrap; }
+        .chip.mitre { color: var(--cyan); border-color: rgba(0,229,255,0.35); text-decoration: none; }
+        a.chip.mitre:hover { background: rgba(0,229,255,0.1); }
+        .chip.tool { color: var(--emerald); border-color: rgba(16,185,129,0.35); }
+        .case-sub { font-family: 'Fira Code', monospace; font-size: 0.68rem; color: var(--text-muted); letter-spacing: 1.5px; margin-top: 1rem; }
+        .case-share { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); font-family: 'Fira Code', monospace; font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 3px; cursor: pointer; margin-top: 0.6rem; transition: 0.3s; }
+        .case-share:hover { border-color: var(--cyan); color: var(--cyan); }
+
+        .case-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); gap: 0.5rem; }
         .case-nav button {
             background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
             font-family: 'Fira Code', monospace; font-size: 0.75rem; padding: 0.5rem 1rem; border-radius: 3px;
@@ -477,8 +670,8 @@
         .case-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
         .case-counter { font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 1px; }
 
-        .case-flow { border-left: 2px solid var(--border-color); padding-left: 1.5rem; margin-top: 1.5rem; }
-        .case-step { position: relative; margin-bottom: 1.5rem; }
+        .case-flow { border-left: 2px solid var(--border-color); padding-left: 1.5rem; margin-top: 1.2rem; }
+        .case-step { position: relative; margin-bottom: 1.5rem; opacity: 0; animation: fadeInRight 0.5s var(--ease-smooth) forwards; }
         .case-step::before { content: ''; position: absolute; left: -1.9rem; top: 5px; width: 10px; height: 10px; background: var(--bg-panel); border: 2px solid var(--cyan); border-radius: 50%; box-shadow: 0 0 10px var(--cyan); transition: 0.5s ease; }
         .case-step .meta-title { font-family: 'Orbitron', sans-serif; color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.2rem; letter-spacing: 1px; }
 
@@ -493,22 +686,24 @@
             font-size: 0.95rem; outline: none;
         }
         .palette-input::placeholder { color: var(--text-muted); }
-        .palette-results { max-height: 320px; overflow-y: auto; padding: 0.6rem; }
+        .palette-results { max-height: 340px; overflow-y: auto; padding: 0.6rem; }
         .palette-item {
             display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem 0.9rem; border-radius: 4px;
             cursor: pointer; font-family: 'Fira Code', monospace; font-size: 0.82rem; color: var(--text-muted);
             transition: background 0.2s, color 0.2s;
         }
         .palette-item .pi-ico { color: var(--cyan); width: 18px; text-align: center; flex-shrink: 0; }
+        .palette-item mark { background: none; color: var(--cyan); }
         .palette-item.selected, .palette-item:hover { background: rgba(0, 229, 255, 0.08); color: var(--text-main); }
         .palette-item.selected .pi-ico { text-shadow: 0 0 6px var(--cyan); }
         .palette-empty { padding: 1.5rem; text-align: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-muted); }
+        .palette-foot { border-top: 1px solid var(--border-color); padding: 0.6rem 1rem; font-family: 'Fira Code', monospace; font-size: 0.68rem; color: var(--text-muted); display: flex; gap: 1rem; }
 
         /* Toasts */
         #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9993; display: flex; flex-direction: column; gap: 0.6rem; pointer-events: none; }
         .toast {
             background: rgba(13, 18, 25, 0.95); border: 1px solid var(--cyan); border-left: 3px solid var(--cyan);
-            color: var(--cyan); font-family: 'Fira Code', monospace; font-size: 0.75rem; letter-spacing: 1px;
+            color: #00E5FF; font-family: 'Fira Code', monospace; font-size: 0.75rem; letter-spacing: 1px;
             padding: 0.7rem 1.1rem; border-radius: 3px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             animation: toastIn 0.35s var(--ease-smooth); max-width: 320px;
         }
@@ -529,76 +724,95 @@
 
         /* Matrix rain (konami) */
         #matrix-canvas { position: fixed; inset: 0; z-index: 9994; pointer-events: none; opacity: 0; transition: opacity 0.6s ease; }
-        #matrix-canvas.active { opacity: 1; }
+        #matrix-canvas.on { opacity: 1; }
 
         @keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
         /* =========================================
-           MOBILE OPTIMIZATION
+           RESPONSIVE
            ========================================= */
+        @media (max-width: 1100px) {
+            .nav-links { gap: 1.1rem; }
+            .palette-trigger { display: none; }
+        }
+        @media (max-width: 960px) {
+            .mitre-matrix { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .console-grid { grid-template-columns: 1fr; }
+        }
         @media (max-width: 900px) {
             .nav-links { display: none; }
             #utc-clock { display: none; }
             #menu-toggle { display: flex; }
-            #mobile-menu { display: flex; }
-            .mobile-links { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; }
-            .mobile-links a {
-                font-family: 'Orbitron', sans-serif; font-size: 1.1rem; letter-spacing: 2px; color: var(--text-main);
-                text-decoration: none; padding: 0.9rem 0.5rem; border-bottom: 1px solid var(--border-color);
-                display: flex; justify-content: space-between; align-items: center;
-            }
-            .mobile-links a span { color: var(--cyan); font-family: 'Fira Code', monospace; font-size: 0.75rem; }
         }
-        @media (min-width: 901px) { #mobile-menu { display: none !important; } }
 
         /* Medium desktops: keep the shield clear of the left-aligned hero text */
         @media (min-width: 901px) and (max-width: 1240px) {
             .shield-bg-container { right: -14%; height: 70vh; width: 70vh; opacity: 0.85; }
-            .hero-content { max-width: 480px; }
-            .hero-slogan { max-width: 480px; }
-            .hero-name { max-width: 480px; }
+            .hero-content, .hero-slogan, .hero-name { max-width: 480px; }
         }
 
         @media (max-width: 768px) {
-            .container { padding: 3rem 1.5rem; }
-            h2 { font-size: 1.8rem; margin-bottom: 1.5rem; }
-            .hero-name { margin: 0 auto 0.5rem auto; }
-            .hero-slogan { text-align: center; }
-            #hero p { font-size: 1rem; text-align: center; }
-            .hero-content { display: flex; flex-direction: column; align-items: center; justify-content: center;}
-            .hero-buttons { width: 100%; display: flex; flex-direction: column; gap: 0.5rem;}
+            .container { padding: 3rem 1rem; }
+            #hero { padding: 6rem 1rem 3rem; }
+            h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
+            .section-lede { margin-top: -0.5rem; }
+            .hero-content { align-items: center; text-align: center; }
+            .hero-name { margin: 0 auto 0.5rem auto; align-items: center; }
+            .hero-slogan, #hero p { text-align: center; }
+            #hero p { font-size: 1rem; }
+            .hero-buttons { width: 100%; flex-direction: column; gap: 0.5rem; }
             .btn { margin-right: 0; width: 100%; }
             .shield-bg-container { right: 50%; transform: translate(50%, -50%); height: 100vw; width: 100vw; opacity: 0.15; z-index: -1; }
             .scroll-hint { display: none; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
             .cyber-photo-frame { width: 150px; height: 150px; }
-            .footer-heading { font-size: 1.8rem; margin-bottom: 0.5rem; }
-            .footer-target { font-size: 0.85rem; padding: 0 1rem; line-height: 1.5; }
+            .footer-heading { font-size: 1.6rem; margin-bottom: 0.5rem; }
+            .footer-target { font-size: 0.85rem; line-height: 1.5; }
             .about-grid { grid-template-columns: 1fr; gap: 2rem; }
             .about-top-flex { flex-direction: column; align-items: center; text-align: center; }
             .thinking-box { border-left: none; padding-left: 0; border-top: 2px solid var(--cyan); padding-top: 1rem; margin-top: 1rem; width: 100%;}
-            .grid { grid-template-columns: 1fr; }
+            .terminal-box { padding: 1rem; font-size: 0.76rem; }
+            .grid, #projects .grid { grid-template-columns: 1fr; }
             .investigate-banner { grid-template-columns: 1fr; padding: 1.5rem;}
             .timeline-wrapper { padding: 1.5rem 1rem; }
-            .social-icons-container { flex-wrap: wrap; gap: 1rem; }
+            .mitre-matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .social-icons-container { gap: 1rem; }
             .social-link { width: 50px; height: 50px; border-radius: 8px; }
             .social-link svg { width: 24px; height: 24px; }
-            nav { padding: 1rem 1.2rem; }
+            nav#main-nav, nav#main-nav.scrolled { padding: 0.8rem 1rem; }
             .logo-sig { font-size: 1rem; }
             .cyber-orb { width: 38px; height: 38px; }
-            #projects .grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+            .modal-content { padding: 2rem 1.2rem; }
+            .case-nav button { padding: 0.5rem 0.6rem; font-size: 0.68rem; }
             #toast-container { left: 1rem; right: 1rem; }
             .toast { max-width: none; }
+            footer { padding: 3rem 1rem; }
         }
 
         /* Respect reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
             html { scroll-behavior: auto; }
-            .reveal-up, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; }
+            .js .reveal-up, .js .reveal-left, .js .reveal-right, .js .reveal-scale { opacity: 1; transform: none; }
+            #boot-screen { display: none; }
+            .case-step { opacity: 1; }
         }
     </style>
 </head>
 <body>
+    <script>
+        // Apply theme before first paint: saved choice, else the OS preference
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('portfolio-theme'); } catch (e) {}
+            if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            document.body.classList.add(t === 'light' ? 'light-mode' : 'dark-mode');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', t === 'light' ? '#F3F4F6' : '#070A0F');
+        })();
+    </script>
+
+    <a href="#about" class="skip-link">Skip to content</a>
+
     <div id="boot-screen" aria-hidden="true">
         <div class="boot-logo">AE // SOC TERMINAL</div>
         <div class="boot-bar"><span></span></div>
@@ -619,42 +833,48 @@
     <div class="cyber-orb-bg-1" aria-hidden="true"></div>
     <div class="cyber-orb-bg-2" aria-hidden="true"></div>
 
-    <nav id="main-nav">
+    <nav id="main-nav" aria-label="Primary">
         <a href="#hero" class="logo-sig">AE // PORTFOLIO</a>
         <div class="nav-links">
             <a href="#about">About</a>
             <a href="#skills">Skills</a>
+            <a href="#mitre">ATT&amp;CK</a>
+            <a href="#console">Console</a>
             <a href="#projects">Projects</a>
             <a href="#contact">Contact</a>
         </div>
         <div class="nav-controls">
+            <button class="palette-trigger" id="palette-trigger" aria-label="Open command palette">Ctrl K</button>
             <span id="utc-clock" title="Coordinated Universal Time"><b>UTC</b> --:--:--</span>
             <button id="theme-toggle" class="cyber-orb" title="Toggle light/dark mode" aria-label="Toggle theme">
                 <span class="orb-core"></span>
                 <span class="orb-ring"></span>
             </button>
-            <button id="menu-toggle" aria-label="Open menu" aria-expanded="false">
+            <button id="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
                 <span></span><span></span><span></span>
             </button>
         </div>
     </nav>
 
-    <div id="mobile-menu" class="modal-overlay">
+    <div id="mobile-menu" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Navigation menu">
         <div class="modal-content" style="max-width:420px;">
-            <button class="close-modal" onclick="closeModal('mobile-menu')" aria-label="Close menu">×</button>
+            <button class="close-modal" data-close="mobile-menu" aria-label="Close menu">×</button>
             <span class="section-sig">AE // NAVIGATION</span>
-            <nav class="mobile-links">
+            <nav class="mobile-links" aria-label="Mobile">
                 <a href="#hero" data-close-menu>HOME <span>00</span></a>
                 <a href="#about" data-close-menu>ABOUT <span>01</span></a>
                 <a href="#education" data-close-menu>EDUCATION <span>02</span></a>
                 <a href="#skills" data-close-menu>SKILLS <span>03</span></a>
                 <a href="#experience" data-close-menu>EXPERIENCE <span>04</span></a>
-                <a href="#projects" data-close-menu>PROJECTS <span>05</span></a>
-                <a href="#contact" data-close-menu>CONTACT <span>06</span></a>
+                <a href="#mitre" data-close-menu>ATT&amp;CK <span>05</span></a>
+                <a href="#console" data-close-menu>CONSOLE <span>06</span></a>
+                <a href="#projects" data-close-menu>PROJECTS <span>07</span></a>
+                <a href="#contact" data-close-menu>CONTACT <span>08</span></a>
             </nav>
         </div>
     </div>
 
+    <main>
     <!-- 1. COVER (HERO) -->
     <section id="hero">
         <div class="shield-bg-container" aria-hidden="true">
@@ -694,6 +914,13 @@
                     <line x1="400" y1="140" x2="400" y2="740" stroke="var(--cyan)" stroke-width="1" opacity="0.15"/>
                     <line x1="180" y1="440" x2="620" y2="440" stroke="var(--cyan)" stroke-width="1" opacity="0.15"/>
                     <g id="binary-rain-group" font-family="'Fira Code', monospace"></g>
+                    <!-- Radar contacts: threats picked up by the sweep -->
+                    <g fill="#F87171">
+                        <circle class="radar-blip" cx="505" cy="300" r="6" style="animation-delay:0.25s"/>
+                        <circle class="radar-blip" cx="560" cy="520" r="5" style="animation-delay:1.6s"/>
+                        <circle class="radar-blip" cx="290" cy="600" r="6" style="animation-delay:2.9s"/>
+                        <circle class="radar-blip" cx="270" cy="330" r="4" style="animation-delay:4.1s"/>
+                    </g>
                 </g>
                 <path d="M400 100 L650 200 C650 200 650 450 650 550 C650 700 400 780 400 780 C400 780 150 700 150 550 C150 450 150 200 150 200 Z" fill="none" stroke="var(--cyan)" stroke-width="4" filter="url(#neon-glow)" opacity="0.9" />
                 <g class="orbit-ring r1" fill="none" stroke="var(--cyan)" stroke-width="1" opacity="0.3" stroke-dasharray="6 10">
@@ -708,17 +935,18 @@
         </div>
 
         <div class="hero-content">
-            <h1 class="hero-name orbitron-font reveal-left active">
+            <span class="status-pill hero-in"><i></i>OPEN TO SOC INTERNSHIPS</span>
+            <h1 class="hero-name orbitron-font hero-in" style="animation-delay:0.05s;">
                 <span class="glitch" data-text="AHMED MOHAMED">AHMED MOHAMED</span>
                 <span class="glitch" data-text="EFFAT">EFFAT</span>
             </h1>
 
-            <h2 class="hero-slogan orbitron-font reveal-left active" style="transition-delay: 0.1s;">I DON'T JUST LEARN CYBERSECURITY.<br><span class="text-cyan">I INVESTIGATE IT.</span></h2>
-            <p class="mono text-muted reveal-left active" style="transition-delay: 0.2s;">SOC Intern | Junior SOC Analyst</p>
+            <h2 class="hero-slogan orbitron-font hero-in" style="animation-delay: 0.15s;">I DON'T JUST LEARN CYBERSECURITY.<br><span class="text-cyan">I INVESTIGATE IT.</span></h2>
+            <p class="mono text-muted hero-in" style="animation-delay: 0.25s;"><span class="text-cyan">&gt;</span> <span id="role-rotator">SOC Intern | Junior SOC Analyst</span><span class="cursor" aria-hidden="true"></span></p>
 
-            <div class="hero-buttons reveal-up active" style="transition-delay: 0.3s;">
+            <div class="hero-buttons hero-in" style="animation-delay: 0.35s;">
                 <a href="#projects" class="btn">View Case Files</a>
-                <a href="#contact" class="btn btn-secondary">Contact Me</a>
+                <a href="#console" class="btn btn-secondary">Try The Triage Challenge</a>
             </div>
         </div>
 
@@ -727,6 +955,29 @@
             <span class="chev"></span>
         </div>
     </section>
+
+    <!-- STATS -->
+    <section id="stats" class="container" aria-label="Highlights">
+        <div class="stats-grid">
+            <div class="glow-card stat reveal-up">
+                <div class="stat-num" data-from="100" data-to="4" data-pre="TOP " data-suf="%">TOP 4%</div>
+                <div class="stat-label">TryHackMe global rank</div>
+            </div>
+            <div class="glow-card stat reveal-up">
+                <div class="stat-num" data-to="120" data-suf="H">120H</div>
+                <div class="stat-label">Network security training</div>
+            </div>
+            <div class="glow-card stat reveal-up">
+                <div class="stat-num" data-to="98.5" data-dec="1" data-suf="%">98.5%</div>
+                <div class="stat-label">ITIDA &amp; NTI final score</div>
+            </div>
+            <div class="glow-card stat reveal-up">
+                <div class="stat-num" data-to="4">4</div>
+                <div class="stat-label">Documented case files</div>
+            </div>
+        </div>
+    </section>
+
     <!-- 2. ABOUT & PHOTO -->
     <section id="about" class="container">
         <span class="section-sig reveal-left">AE // IDENTITY</span>
@@ -736,11 +987,11 @@
             <div class="about-text">
                 <div class="about-top-flex">
                     <div class="cyber-photo-frame reveal-scale">
-                        <img src="cv/ph.jpeg" alt="Ahmed Mohamed Effat">
+                        <img src="cv/ph.jpeg" alt="Ahmed Mohamed Effat" width="164" height="164" onerror="this.style.display='none';this.parentNode.classList.add('no-photo');">
                     </div>
 
                     <div class="thinking-box reveal-right">
-                        <span class="section-sig" style="color:var(--cyan); margin-bottom: 1rem;">HOW I THINK</span>
+                        <span class="section-sig" style="margin-bottom: 1rem;">HOW I THINK</span>
                         <ul>
                             <li><span class="text-cyan">ALERT</span> &ne; INCIDENT</li>
                             <li><span class="text-cyan">INDICATOR</span> &ne; CONCLUSION</li>
@@ -761,10 +1012,17 @@
                 </p>
             </div>
 
-            <div id="about-terminal" class="terminal-box mono reveal-right" tabindex="0">
-                <div class="terminal-header"><span>Terminal - root@soc-analyst:~</span><span class="text-emerald">● LIVE</span></div>
-                <div id="about-terminal-content"></div>
-                <span class="cursor"></span>
+            <div id="about-terminal" class="terminal-box mono reveal-right">
+                <div class="terminal-header">
+                    <span><span class="term-dots" aria-hidden="true"><i></i><i></i><i></i></span>root@soc-analyst:~</span>
+                    <span class="text-emerald" style="color:#10B981;">● LIVE</span>
+                </div>
+                <div id="term-out" class="term-out" role="log" aria-live="polite"></div>
+                <form id="term-form" class="term-input-row" autocomplete="off">
+                    <label for="term-input" class="term-prompt">soc@ae:~$</label>
+                    <input id="term-input" type="text" spellcheck="false" autocapitalize="off" placeholder="type 'help'" aria-label="Terminal command">
+                </form>
+                <div class="term-hint">try <b>help</b>, <b>cases</b>, <b>open INC-001</b> · <b>Tab</b> autocompletes · <b>↑</b> history</div>
             </div>
         </div>
     </section>
@@ -779,9 +1037,9 @@
                 <p class="text-cyan mono" style="font-size: 0.85rem;">Arab Open University (AOU) | 2023 - Present</p>
                 <p class="text-muted" style="font-size: 0.9rem; margin-top: 0.5rem;">Specializing in Cybersecurity and network security coursework.</p>
             </div>
-            <div class="timeline-item completed">
+            <div class="timeline-item studying">
                 <h4 class="orbitron-font">Cyber Security Incident Response Analyst</h4>
-                <p class="text-emerald mono" style="font-size: 0.85rem;">DEPI (Digital Egypt Pioneers Initiative) | Jul 2026 – Present</p>
+                <p class="text-cyan mono" style="font-size: 0.85rem;">DEPI (Digital Egypt Pioneers Initiative) | Jul 2026 – Present</p>
                 <p class="text-muted" style="font-size: 0.9rem; margin-top: 0.5rem;">Hands-on training focused on incident response and cybersecurity operations.</p>
             </div>
             <div class="timeline-item studying">
@@ -789,7 +1047,7 @@
                 <p class="text-cyan mono" style="font-size: 0.85rem;">Self-Study / In Progress</p>
                 <ul class="text-muted" style="font-size: 0.9rem; margin-top: 0.5rem; margin-left: 1rem;">
                     <li>CCNA &amp; CompTIA Security+</li>
-                    <li>ELearnSecurity Certified Incident Responder (eCIR)</li>
+                    <li>eLearnSecurity Certified Incident Responder (eCIR)</li>
                     <li>Certified Ethical Hacker (CEH)</li>
                     <li>GIAC Security Operations Certified (GSOC) — SANS SEC450</li>
                 </ul>
@@ -801,13 +1059,13 @@
     <section id="skills" class="container">
         <span class="section-sig reveal-left">AE // SKILLS</span>
         <h2 class="reveal-left">Tool Capabilities &amp; Evidence</h2>
-        <p class="text-muted mono reveal-left" style="margin-bottom: 2rem; font-size: 0.85rem;">// I don't just list tools — I show where I used them.</p>
+        <p class="text-muted mono reveal-left section-lede">// I don't just list tools — I show where I used them.</p>
 
         <div class="grid">
             <div class="glow-card reveal-up">
                 <h4>
                     <div class="glass-icon-wrapper">
-                        <svg class="tool-icon" viewBox="0 0 24 24"><path d="M19.649 5.286l-4.707 13.784-3.844-8.824-2.81 4.542H2.5v-2h4.59l1.64-2.651 4.156 9.544 3.325-9.742 2.378 4.343h2.91v-2h-1.63z"/></svg>
+                        <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.649 5.286l-4.707 13.784-3.844-8.824-2.81 4.542H2.5v-2h4.59l1.64-2.651 4.156 9.544 3.325-9.742 2.378 4.343h2.91v-2h-1.63z"/></svg>
                     </div>
                     WIRESHARK
                 </h4>
@@ -822,13 +1080,13 @@
             <div class="glow-card reveal-up">
                 <h4>
                     <div class="glass-icon-wrapper">
-                        <svg class="tool-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                        <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1L3 5v6c0 5.55 3.840 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.410L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
                     </div>
                     SIEM &amp; EDR
                 </h4>
                 <span class="tag hands-on">[ Hands-On ]</span>
                 <div class="tool-meta">Tools:</div>
-                <div class="tool-data">Splunk, ELK, Security Onion, Velociraptor</div>
+                <div class="tool-data">Splunk, ELK, Security Onion, Velociraptor, Wazuh</div>
                 <div class="tool-meta">Evidence:</div>
                 <div class="tool-data text-muted">Log analysis, Alert triage</div>
                 <div class="tool-meta">Demonstrates:</div>
@@ -837,7 +1095,7 @@
             <div class="glow-card reveal-up">
                 <h4>
                     <div class="glass-icon-wrapper">
-                        <svg class="tool-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.410 0 2.08-.8 3.97-2.1 5.39z"/></svg>
                     </div>
                     NETWORK SECURITY
                 </h4>
@@ -851,6 +1109,7 @@
             </div>
         </div>
     </section>
+
     <!-- 5. EXPERIENCE -->
     <section id="experience" class="container">
         <span class="section-sig reveal-left">AE // EXPERIENCE</span>
@@ -888,44 +1147,134 @@
         </div>
     </section>
 
-    <!-- 7. PROJECTS -->
+    <!-- 7. MITRE ATT&CK COVERAGE -->
+    <section id="mitre" class="container">
+        <span class="section-sig reveal-left">AE // ATT&amp;CK COVERAGE</span>
+        <h2 class="reveal-left">Techniques I've Investigated</h2>
+        <p class="text-muted mono reveal-left section-lede">// Mapped from my case files to MITRE ATT&amp;CK. Click a technique to open the evidence.</p>
+
+        <div class="mitre-matrix reveal-up">
+            <div class="mitre-col">
+                <div class="mitre-tactic">Reconnaissance<span>TA0043</span></div>
+                <button class="mitre-tech" data-case="REC-004"><b>T1595</b>Active Scanning<em>▸ REC-004</em></button>
+            </div>
+            <div class="mitre-col">
+                <div class="mitre-tactic">Discovery<span>TA0007</span></div>
+                <button class="mitre-tech" data-case="REC-004"><b>T1046</b>Network Service Discovery<em>▸ REC-004</em></button>
+            </div>
+            <div class="mitre-col">
+                <div class="mitre-tactic">Defense Evasion<span>TA0005</span></div>
+                <button class="mitre-tech" data-case="INC-001"><b>T1036</b>Masquerading<em>▸ INC-001</em></button>
+            </div>
+            <div class="mitre-col">
+                <div class="mitre-tactic">Lateral Movement<span>TA0008</span></div>
+                <button class="mitre-tech" data-case="INC-001"><b>T1021.002</b>SMB / Windows Admin Shares<em>▸ INC-001</em></button>
+            </div>
+            <div class="mitre-col">
+                <div class="mitre-tactic">Command &amp; Control<span>TA0011</span></div>
+                <button class="mitre-tech" data-case="INC-001"><b>T1071.001</b>Web Protocols<em>▸ INC-001</em></button>
+            </div>
+            <div class="mitre-col">
+                <div class="mitre-tactic">Exfiltration<span>TA0010</span></div>
+                <button class="mitre-tech" data-case="INC-001"><b>T1041</b>Exfiltration Over C2 Channel<em>▸ INC-001</em></button>
+            </div>
+        </div>
+        <div class="mitre-legend reveal-up">
+            <span><i></i>Observed &amp; analysed in a case file</span>
+            <span>6 tactics · 6 techniques · 2 case files</span>
+        </div>
+    </section>
+
+    <!-- 8. SOC CONSOLE -->
+    <section id="console" class="container">
+        <span class="section-sig reveal-left">AE // SOC CONSOLE</span>
+        <h2 class="reveal-left">Think Like An Analyst</h2>
+        <p class="text-muted mono reveal-left section-lede">// Alert &ne; incident. Read the evidence, then make the call — escalate or close.</p>
+
+        <div class="console-grid">
+            <div class="panel reveal-left" aria-label="Simulated alert queue">
+                <div class="panel-head">
+                    <span>ALERT QUEUE // <span class="live" id="feed-state">● LIVE</span></span>
+                    <button class="feed-toggle" id="feed-toggle" aria-pressed="false">PAUSE</button>
+                </div>
+                <div class="sev-counters">
+                    <div class="sev-c crit"><b id="c-CRITICAL">0</b>CRIT</div>
+                    <div class="sev-c high"><b id="c-HIGH">0</b>HIGH</div>
+                    <div class="sev-c med"><b id="c-MEDIUM">0</b>MED</div>
+                    <div class="sev-c low"><b id="c-LOW">0</b>LOW</div>
+                </div>
+                <ul class="feed" id="feed" aria-live="off"></ul>
+                <div class="panel-foot">// SIMULATED DATA — illustrative alert stream, not a real environment</div>
+            </div>
+
+            <div class="panel reveal-right" id="triage" aria-label="Triage challenge">
+                <div class="panel-head">
+                    <span>TRIAGE CHALLENGE</span>
+                    <span id="tri-count">ALERT 1 / 4</span>
+                </div>
+                <div class="triage-meta">
+                    <span class="sev-badge" id="tri-sev">HIGH</span>
+                    <span class="triage-src" id="tri-src"></span>
+                </div>
+                <div class="triage-rule" id="tri-rule"></div>
+                <ul class="evidence" id="tri-evidence"></ul>
+                <p class="triage-q">What's your verdict?</p>
+                <div class="triage-actions">
+                    <button class="tri-btn esc" data-verdict="tp">⚠ ESCALATE — TRUE POSITIVE</button>
+                    <button class="tri-btn cls" data-verdict="fp">✓ CLOSE — BENIGN</button>
+                </div>
+                <div class="tri-result" id="tri-result" aria-live="polite"></div>
+                <div class="tri-foot">
+                    <div class="tri-progress" id="tri-progress" aria-hidden="true"></div>
+                    <span id="tri-score">SCORE 0 / 0</span>
+                    <button class="tri-next" id="tri-next">NEXT ALERT &gt;&gt;</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. PROJECTS -->
     <section id="projects" class="container">
         <span class="section-sig reveal-left">AE // PROJECTS</span>
         <h2 class="reveal-left">Investigation Portfolio</h2>
-        <p class="mono text-muted reveal-left" style="margin-bottom: 2rem;">&gt; Click on any case file to open the detailed investigation log. Use <kbd style="border:1px solid var(--border-color); border-radius:3px; padding:0.1rem 0.35rem; font-size:0.7rem;">Ctrl+K</kbd> to search.</p>
-        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <p class="mono text-muted reveal-left section-lede">&gt; Click any case file to open the investigation log. Press <kbd>Ctrl</kbd>+<kbd>K</kbd> to search.</p>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 2rem;">
             <div class="glow-card project-card reveal-up" data-case="INC-001" tabindex="0" role="button" aria-label="Open case file INC-001">
-                <div class="case-id">CASE FILE // INC-001</div>
+                <div class="case-id"><span>CASE FILE // INC-001</span><span class="sev" style="color:var(--sev-high);">■ HIGH</span></div>
                 <h4>Network Forensics — PCAP Investigation</h4>
                 <span class="tag hands-on">INDEPENDENT LAB</span>
                 <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">Analysed network traffic to identify a payload disguised as an image and recovered exfiltrated data from a multipart HTTP POST request.</p>
+                <div class="card-mitre"><span class="chip mitre">T1036</span><span class="chip mitre">T1021.002</span><span class="chip mitre">T1071.001</span><span class="chip mitre">T1041</span></div>
                 <div class="click-hint">[+] Click to view findings</div>
             </div>
             <div class="glow-card project-card reveal-up" data-case="LAB-002" tabindex="0" role="button" aria-label="Open case file LAB-002">
-                <div class="case-id">CASE FILE // LAB-002</div>
+                <div class="case-id"><span>CASE FILE // LAB-002</span><span class="sev" style="color:var(--emerald);">● ACTIVE</span></div>
                 <h4>SOC Home Lab Deployment</h4>
                 <span class="tag hands-on">HANDS-ON LAB</span>
                 <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">Deployed agents on endpoints and generated simulated attacks to trigger SIEM alerts for security monitoring and log analysis.</p>
+                <div class="card-mitre"><span class="chip tool">Wazuh</span><span class="chip tool">Kali Linux</span><span class="chip tool">Windows</span></div>
                 <div class="click-hint">[+] Click to view findings</div>
             </div>
             <div class="glow-card project-card reveal-up" data-case="NET-003" tabindex="0" role="button" aria-label="Open case file NET-003">
-                <div class="case-id">CASE FILE // NET-003</div>
+                <div class="case-id"><span>CASE FILE // NET-003</span><span class="sev">■ DEFENSIVE</span></div>
                 <h4>Network Security Architecture</h4>
                 <span class="tag hands-on">HANDS-ON LAB</span>
                 <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">Completed hands-on Packet Tracer labs covering SSH, Syslog, NTP, TACACS+, RADIUS, OSPF authentication, and extended ACLs.</p>
+                <div class="card-mitre"><span class="chip tool">Packet Tracer</span><span class="chip tool">ACLs</span><span class="chip tool">AAA</span></div>
                 <div class="click-hint">[+] Click to view findings</div>
             </div>
             <div class="glow-card project-card reveal-up" data-case="REC-004" tabindex="0" role="button" aria-label="Open case file REC-004">
-                <div class="case-id">CASE FILE // REC-004</div>
+                <div class="case-id"><span>CASE FILE // REC-004</span><span class="sev" style="color:var(--sev-med);">■ MEDIUM</span></div>
                 <h4>Nmap Reconnaissance Lab</h4>
                 <span class="tag working">AUTHORIZED LAB</span>
                 <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">Executed various scan types and service enumeration to understand network mapping and SIEM detectability.</p>
+                <div class="card-mitre"><span class="chip mitre">T1595</span><span class="chip mitre">T1046</span></div>
                 <div class="click-hint">[+] Click to view findings</div>
             </div>
         </div>
     </section>
 
-    <!-- 8. ACHIEVEMENTS -->
+    <!-- 10. ACHIEVEMENTS -->
     <section id="achievements" class="container">
         <span class="section-sig reveal-left">AE // ACHIEVEMENTS</span>
         <h2 class="reveal-left">Achievements</h2>
@@ -934,7 +1283,9 @@
             <p class="text-muted" style="margin-bottom:0; font-size:0.95rem;">Ranked in the Top 4% of users through consistent and continuous hands-on engagement with defensive and offensive security modules.</p>
         </div>
     </section>
-    <!-- 9. CONTACT -->
+    </main>
+
+    <!-- 11. CONTACT -->
     <footer id="contact">
         <div class="container reveal-up">
             <span class="section-sig">AE // CONTACT</span>
@@ -946,38 +1297,39 @@
 
             <div class="hero-buttons" style="justify-content: center; margin-bottom: 2rem;">
                 <a href="mailto:ahmedeffat75@gmail.com" class="btn">Let's Connect</a>
+                <button type="button" class="btn btn-secondary" id="copy-email">Copy Email</button>
                 <a href="cv/cv.pdf" class="btn btn-secondary" download>Download CV</a>
             </div>
 
             <div class="social-icons-container">
                 <a href="https://github.com/ahmedeffat6" class="social-link github" title="GitHub" target="_blank" rel="noopener" aria-label="GitHub">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.910 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
                     </svg>
                 </a>
 
                 <a href="https://linkedin.com/in/ahmed-mohammed-2e2" class="social-link linkedin" title="LinkedIn" target="_blank" rel="noopener" aria-label="LinkedIn">
-                    <svg viewBox="0 0 24 24">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                     </svg>
                 </a>
 
                 <a href="https://tryhackme.com/p/3ffat0x" class="social-link thm" title="TryHackMe" target="_blank" rel="noopener" aria-label="TryHackMe">
-                    <svg viewBox="0 0 24 24">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M10.705 0C7.54 0 4.902 2.285 4.349 5.291a4.525 4.525 0 0 0-4.107 4.5 4.525 4.525 0 0 0 4.52 4.52h6.761a.625.625 0 1 0 0-1.25H4.761a3.273 3.273 0 0 1-3.27-3.27A3.273 3.273 0 0 1 6.59 7.08a.625.625 0 0 0 .7-1.035 4.488 4.488 0 0 0-1.68-.69 5.223 5.223 0 0 1 5.096-4.104 5.221 5.221 0 0 1 5.174 4.57 4.489 4.489 0 0 0-.488.305.625.625 0 1 0 .731 1.013 3.245 3.245 0 0 1 1.912-.616 3.278 3.278 0 0 1 3.203 2.61.625.625 0 0 0 1.225-.251 4.533 4.533 0 0 0-4.428-3.61 4.54 4.54 0 0 0-.958.105C16.556 2.328 13.9 0 10.705 0zm5.192 10.64a.925.925 0 0 0-.462.108.913.913 0 0 0-.313.29 1.27 1.27 0 0 0-.175.427 2.39 2.39 0 0 0-.054.514c0 .181.018.353.054.517.036.164.095.307.175.43a.899.899 0 0 0 .313.297c.127.073.281.11.462.11.18 0 .334-.037.46-.11a.897.897 0 0 0 .309-.296c.08-.124.137-.267.173-.431.036-.164.054-.336.054-.517 0-.18-.018-.352-.054-.514a1.271 1.271 0 0 0-.173-.426.901.901 0 0 0-.309-.291.917.917 0 0 0-.46-.108zm6.486 0a.925.925 0 0 0-.462.108.913.913 0 0 0-.313.29 1.27 1.27 0 0 0-.175.427 2.39 2.39 0 0 0-.053.514c0 .181.017.353.053.517.036.164.095.307.175.43a.899.899 0 0 0 .313.297c.127.073.281.11.462.11.18 0 .334-.037.46-.11a.897.897 0 0 0 .31-.296c.078-.124.136-.267.172-.431.036-.164.054-.336.054-.517 0-.18-.018-.352-.054-.514a1.271 1.271 0 0 0-.173-.426.901.901 0 0 0-.308-.291.916.916 0 0 0-.461-.108zm-8.537.068l-.84.618.313.43.476-.368v1.877h.603v-2.557zm6.486 0l-.841.618.314.43.477-.368v1.877h.603v-2.557zm-4.435.445c.08 0 .143.028.193.084.05.057.087.127.114.21.026.083.044.173.054.269a2.541 2.541 0 0 1 0 .533c-.01.097-.028.187-.054.27a.584.584 0 0 1-.114.21.243.243 0 0 1-.193.085.248.248 0 0 1-.195-.086.584.584 0 0 1-.118-.209 1.245 1.245 0 0 1-.056-.27 2.645 2.645 0 0 1 0-.533c.01-.096.029-.186.056-.27a.583.583 0 0 1 .118-.209.25.25 0 0 1 .195-.084zm6.486 0c.08 0 .144.028.193.084.05.057.087.127.114.21.027.083.044.173.054.269a2.541 2.541 0 0 1 0 .533c-.01.097-.027.187-.054.27a.584.584 0 0 1-.114.21.243.243 0 0 1-.193.085.249.249 0 0 1-.195-.086.581.581 0 0 1-.117-.209 1.245 1.245 0 0 1-.056-.27 2.642 2.642 0 0 1 0-.533c.01-.096.028-.186.056-.27a.58.58 0 0 1 .117-.209.25.25 0 0 1 .195-.084zm-2.191 3.51a.93.93 0 0 0-.463.109.908.908 0 0 0-.312.291c-.08.122-.139.263-.175.426a2.383 2.383 0 0 0-.054.514c0 .18.018.353.054.516.036.164.094.308.175.432a.91.91 0 0 0 .312.296.92.92 0 0 0 .463.11c.18 0 .333-.037.46-.11a.892.892 0 0 0 .308-.296 1.32 1.32 0 0 0 .174-.432c.036-.163.054-.335.054-.516 0-.18-.018-.352-.054-.514a1.274 1.274 0 0 0-.174-.426.89.89 0 0 0-.309-.291.918.918 0 0 0-.46-.108zm-6.402.07l-.841.617.314.43.476-.369v1.878h.604v-2.557zm2.125 0l-.841.617.314.43.477-.369v1.878h.603v-2.557zm2.116 0l-.84.617.313.43.477-.369v1.878h.603v-2.557zm2.16.443c.08 0 .144.028.194.085a.605.605 0 0 1 .114.21c.026.083.044.172.053.269a2.639 2.639 0 0 1 0 .532 1.28 1.28 0 0 1-.053.27.585.585 0 0 1-.114.21.244.244 0 0 1-.193.085.25.25 0 0 1-.196-.085.589.589 0 0 1-.117-.21 1.245 1.245 0 0 1-.056-.27 2.597 2.597 0 0 1 0-.532c.01-.097.028-.186.056-.27a.589.589 0 0 1 .117-.209.249.249 0 0 1 .196-.085zm-6.729 3.073a.676.676 0 0 0-.335.078.661.661 0 0 0-.227.211.91.91 0 0 0-.127.31c-.027.118-.04.242-.04.373s.013.256.04.375a.93.93 0 0 0 .127.313.65.65 0 0 0 .227.215c.092.053.204.08.335.08a.655.655 0 0 0 .334-.08.65.65 0 0 0 .225-.215c.057-.09.1-.194.125-.313a1.75 1.75 0 0 0 .04-.375c0-.13-.014-.255-.04-.373a.931.931 0 0 0-.125-.31.658.658 0 0 0-.225-.21.667.667 0 0 0-.334-.08zm3.086 0a.675.675 0 0 0-.336.078.661.661 0 0 0-.226.211.907.907 0 0 0-.127.31 1.69 1.69 0 0 0-.04.373c0 .131.013.256.04.375a.928.928 0 0 0 .127.313c.058.09.134.162.226.215.093.053.205.08.336.08a.655.655 0 0 0 .334-.08.65.65 0 0 0 .224-.215c.058-.09.1-.194.126-.313a1.752 1.752 0 0 0 0-.748.94.94 0 0 0-.126-.31.657.657 0 0 0-.224-.21.667.667 0 0 0-.334-.08zm5.108 0a.675.675 0 0 0-.336.078.661.661 0 0 0-.226.211.91.91 0 0 0-.127.31c-.027.118-.04.242-.04.373s.013.256.04.375a.931.931 0 0 0 .127.313c.058.09.134.162.226.215.093.053.205.08.336.08.13 0 .243-.027.334-.08a.65.65 0 0 0 .224-.215c.058-.09.1-.194.126-.313a1.75 1.75 0 0 0 .04-.375c0-.13-.014-.255-.04-.373a.943.943 0 0 0-.126-.31.657.657 0 0 0-.224-.21.668.668 0 0 0-.334-.08zm-6.658.05l-.61.448.227.311.346-.266v1.362h.438v-1.856zm3.068 0l-.61.448.227.311.346-.266v1.362h.438v-1.856zm5.108 0l-.611.448.228.311.346-.266v1.362h.438v-1.856zm-9.712.322c.058 0 .105.02.14.062a.421.421 0 0 1 .083.151.96.96 0 0 1 .04.196 1.932 1.932 0 0 1 0 .386.954.954 0 0 1-.04.197.421.421 0 0 1-.083.152.176.176 0 0 1-.14.061.18.18 0 0 1-.141-.06.427.427 0 0 1-.085-.153.887.887 0 0 1-.041-.197 1.96 1.96 0 0 1 0-.386.893.893 0 0 1 .04-.196.42.42 0 0 1 .086-.151.181.181 0 0 1 .141-.062zm3.086 0c.058 0 .104.02.14.062a.421.421 0 0 1 .082.151.94.94 0 0 1 .04.196 1.906 1.906 0 0 1 0 .386.93.93 0 0 1-.04.197.421.421 0 0 1-.082.152.176.176 0 0 1-.14.061.18.18 0 0 1-.141-.06.42.42 0 0 1-.086-.153.846.846 0 0 1-.04-.197 1.965 1.965 0 0 1-.011-.195c0-.057.004-.121.01-.191a.849.849 0 0 1 .041-.196.42.42 0 0 1 .086-.151.182.182 0 0 1 .141-.062zm5.108 0c.058 0 .104.02.14.062a.421.421 0 0 1 .082.151.92.92 0 0 1 .04.196 1.963 1.963 0 0 1 0 .386.943.943 0 0 1-.04.197.421.421 0 0 1-.082.152.177.177 0 0 1-.14.061.18.18 0 0 1-.142-.06.437.437 0 0 1-.085-.153.95.95 0 0 1-.04-.197 1.965 1.965 0 0 1-.011-.195c0-.057.004-.121.01-.191a.959.959 0 0 1 .04-.196.47.47 0 0 1 .086-.151.181.181 0 0 1 .142-.062zm-1.684 1.814a.675.675 0 0 0-.336.079.66.66 0 0 0-.227.21.91.91 0 0 0-.127.31 1.731 1.731 0 0 0 0 .748.939.939 0 0 0 .127.314c.059.09.134.162.227.215.093.053.205.08.336.08a.66.66 0 0 0 .334-.08.648.648 0 0 0 .224-.215c.058-.09.1-.195.126-.314a1.737 1.737 0 0 0-.001-.747.928.928 0 0 0-.125-.31.65.65 0 0 0-.224-.211.668.668 0 0 0-.334-.079zm3.063 0a.676.676 0 0 0-.336.079.664.664 0 0 0-.227.21.906.906 0 0 0-.127.31 1.74 1.74 0 0 0 0 .748.936.936 0 0 0 .127.314.66.66 0 0 0 .227.215c.092.053.204.08.336.08a.654.654 0 0 0 .334-.08.648.648 0 0 0 .223-.215c.058-.09.1-.195.126-.314a1.74 1.74 0 0 0 0-.747.928.928 0 0 0-.126-.31.65.65 0 0 0-.223-.211.666.666 0 0 0-.334-.079zm-1.545.05l-.611.448.228.312.346-.267v1.363h.438v-1.856zm-1.518.323c.057 0 .104.02.14.061a.42.42 0 0 1 .082.152.91.91 0 0 1 .04.195 1.966 1.966 0 0 1 0 .387.951.951 0 0 1-.04.197.421.421 0 0 1-.082.152.177.177 0 0 1-.14.06.18.18 0 0 1-.142-.06.428.428 0 0 1-.085-.152.914.914 0 0 1-.04-.197 1.96 1.96 0 0 1-.011-.195c0-.058.003-.122.01-.192a.923.923 0 0 1 .041-.195c.02-.06.048-.11.085-.152a.181.181 0 0 1 .142-.061zm3.063 0c.057 0 .104.02.14.061a.42.42 0 0 1 .082.152.94.94 0 0 1 .04.195 1.91 1.91 0 0 1 0 .387.93.93 0 0 1-.04.197.422.422 0 0 1-.083.152.175.175 0 0 1-.14.06.18.18 0 0 1-.141-.06.423.423 0 0 1-.085-.152.907.907 0 0 1-.04-.197 1.95 1.95 0 0 1 0-.387.915.915 0 0 1 .04-.195c.02-.06.048-.11.085-.152a.182.182 0 0 1 .142-.061zm-9.713.185a.465.465 0 0 0-.232.055.456.456 0 0 0-.157.146.627.627 0 0 0-.089.215 1.168 1.168 0 0 0-.027.259c0 .09.009.177.027.26a.648.648 0 0 0 .089.216c.04.063.093.112.157.149a.459.459 0 0 0 .232.056c.09 0 .168-.02.231-.056a.45.45 0 0 0 .156-.149.67.67 0 0 0 .087-.217 1.218 1.218 0 0 0 0-.518.647.647 0 0 0-.087-.215.448.448 0 0 0-.156-.146.458.458 0 0 0-.23-.055zm1.052.035l-.423.31.158.217.24-.185v.944h.303v-1.286zm-1.052.224c.04 0 .073.014.097.042a.284.284 0 0 1 .057.105.69.69 0 0 1 .028.136c.004.049.007.092.007.133 0 .04-.003.086-.007.135a.684.684 0 0 1-.028.136.285.285 0 0 1-.057.105.123.123 0 0 1-.097.043.125.125 0 0 1-.098-.043.298.298 0 0 1-.059-.105.612.612 0 0 1-.028-.136 1.39 1.39 0 0 1 0-.268.62.62 0 0 1 .028-.136.297.297 0 0 1 .06-.105.125.125 0 0 1 .097-.042zm3.775 1.394a.463.463 0 0 0-.232.054.452.452 0 0 0-.157.146.621.621 0 0 0-.088.214 1.19 1.19 0 0 0 0 .519.641.641 0 0 0 .088.217.46.46 0 0 0 .157.15.458.458 0 0 0 .232.054.454.454 0 0 0 .232-.055.45.45 0 0 0 .155-.149.664.664 0 0 0 .087-.217 1.189 1.189 0 0 0 0-.519.642.642 0 0 0-.087-.214.446.446 0 0 0-.155-.146.459.459 0 0 0-.232-.054zm1.052.034l-.423.31.158.216.24-.185v.945h.303V22.68zm-1.052.223c.04 0 .073.014.098.043a.3.3 0 0 1 .057.105.643.643 0 0 1 .027.135 1.31 1.31 0 0 1 0 .268.654.654 0 0 1-.027.137.307.307 0 0 1-.057.105.124.124 0 0 1-.098.042.125.125 0 0 1-.098-.042.293.293 0 0 1-.059-.105.618.618 0 0 1-.028-.137 1.364 1.364 0 0 1 0-.268.612.612 0 0 1 .028-.135.287.287 0 0 1 .06-.105.123.123 0 0 1 .097-.043z"/>
                     </svg>
                 </a>
 
-                <a href="https://wa.me/+201022777950" class="social-link whatsapp" title="WhatsApp" target="_blank" rel="noopener" aria-label="WhatsApp">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.88-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                <a href="https://wa.me/201022777950" class="social-link whatsapp" title="WhatsApp" target="_blank" rel="noopener" aria-label="WhatsApp">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.990-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.890-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.88-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.040 1.016-1.040 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
                     </svg>
                 </a>
             </div>
 
             <div class="footer-bottom">
-                AHMED MOHAMED EFFAT &copy; 2026 — ALL RIGHTS RESERVED<br>
-                <span style="opacity:0.6;">// BUILT FOR THE BLUE TEAM</span>
+                AHMED MOHAMED EFFAT &copy; <span id="year">2026</span> — ALL RIGHTS RESERVED<br>
+                <span style="opacity:0.6;">// BUILT FOR THE BLUE TEAM · psst: try the konami code</span>
             </div>
         </div>
     </footer>
@@ -985,14 +1337,16 @@
     <!-- CASE STUDY MODAL -->
     <div id="case-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="case-title">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('case-modal')" aria-label="Close case file">×</button>
+            <button class="close-modal" data-close="case-modal" aria-label="Close case file">×</button>
             <span id="case-meta" class="section-sig"></span>
-            <h2 id="case-title" style="margin-bottom: 0.5rem; border:none; font-size: 1.8rem;"></h2>
+            <h2 id="case-title" style="margin-bottom: 0.3rem; border:none; font-size: clamp(1.3rem, 4vw, 1.8rem); padding-right: 2rem;"></h2>
+            <div id="case-header"></div>
+            <div class="case-sub">// INVESTIGATION LOG</div>
             <div class="case-flow" id="case-content"></div>
             <div class="case-nav">
-                <button id="case-prev" aria-label="Previous case file">&lt;&lt; PREV CASE</button>
+                <button id="case-prev" aria-label="Previous case file">&lt;&lt; PREV</button>
                 <span id="case-counter" class="case-counter"></span>
-                <button id="case-next" aria-label="Next case file">NEXT CASE &gt;&gt;</button>
+                <button id="case-next" aria-label="Next case file">NEXT &gt;&gt;</button>
             </div>
         </div>
     </div>
@@ -1000,140 +1354,157 @@
     <!-- COMMAND PALETTE -->
     <div id="command-palette" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Command palette">
         <div class="modal-content palette-content">
-            <input type="text" class="palette-input" id="palette-input" placeholder="Type a command or search... (e.g. 'skills', 'INC-001', 'cv')" autocomplete="off" aria-label="Search commands">
-            <div class="palette-results" id="palette-results"></div>
+            <input type="text" class="palette-input" id="palette-input" placeholder="Type a command or search... (e.g. 'triage', 'INC-001', 'cv')" autocomplete="off" aria-label="Search commands">
+            <div class="palette-results" id="palette-results" role="listbox"></div>
+            <div class="palette-foot"><span>↑↓ navigate</span><span>↵ run</span><span>esc close</span></div>
         </div>
     </div>
 
     <!-- SCRIPTS -->
     <script>
         'use strict';
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const prm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const $ = (s, root) => (root || document).querySelector(s);
+        const $$ = (s, root) => Array.from((root || document).querySelectorAll(s));
+        const EMAIL = 'ahmedeffat75@gmail.com';
+
+        $('#year').textContent = new Date().getFullYear();
 
         /* ---------- TOAST SYSTEM ---------- */
         function toast(msg) {
-            const container = document.getElementById('toast-container');
             const el = document.createElement('div');
             el.className = 'toast';
             el.textContent = msg;
-            container.appendChild(el);
+            $('#toast-container').appendChild(el);
             setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 2600);
         }
 
+        function copyText(text, msg) {
+            const fallback = () => {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                ta.remove();
+            };
+            const p = (navigator.clipboard && window.isSecureContext) ? navigator.clipboard.writeText(text) : Promise.reject();
+            p.catch(fallback).then(() => toast(msg));
+        }
+
+        function downloadCV() {
+            const a = document.createElement('a'); a.href = 'cv/cv.pdf'; a.download = ''; a.click();
+            toast('> CV DOWNLOAD INITIATED');
+        }
+
         /* ---------- THEME TOGGLE ---------- */
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('portfolio-theme');
-        if (savedTheme === 'light') document.body.classList.add('light-mode');
-        else document.body.classList.add('dark-mode');   // dark is the default
+        const themeBtn = $('#theme-toggle');
+        const themeListeners = [];
         themeBtn.addEventListener('click', () => {
             const isLight = document.body.classList.toggle('light-mode');
             document.body.classList.toggle('dark-mode', !isLight);
-            localStorage.setItem('portfolio-theme', isLight ? 'light' : 'dark');
+            try { localStorage.setItem('portfolio-theme', isLight ? 'light' : 'dark'); } catch (e) {}
             toast(isLight ? '> THEME: LIGHT MODE ENGAGED' : '> THEME: DARK MODE ENGAGED');
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#F3F4F6' : '#070A0F');
+            $('meta[name="theme-color"]').setAttribute('content', isLight ? '#F3F4F6' : '#070A0F');
+            themeListeners.forEach(fn => fn(isLight));
         });
 
-        /* ---------- MOBILE MENU ---------- */
-        const menuToggle = document.getElementById('menu-toggle');
-        menuToggle.addEventListener('click', () => {
-            const open = menuToggle.classList.toggle('active');
-            menuToggle.setAttribute('aria-expanded', open);
-            open ? openModal('mobile-menu') : closeModal('mobile-menu');
-        });
-        document.querySelectorAll('[data-close-menu]').forEach(a => a.addEventListener('click', () => {
-            menuToggle.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
-            closeModal('mobile-menu');
-        }));
-
-        /* ---------- MODAL SYSTEM ---------- */
+        /* ---------- MODAL SYSTEM (focus trap, focus restore, scroll lock) ---------- */
+        const FOCUSABLE = 'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])';
+        const menuToggle = $('#menu-toggle');
         function openModal(id) {
-            document.getElementById(id).classList.add('active');
-            document.body.style.overflow = 'hidden';
+            const m = document.getElementById(id);
+            if (m.classList.contains('open')) return;
+            m._returnFocus = document.activeElement;
+            m.classList.add('open');
+            document.body.classList.add('modal-open');
+            const first = id === 'command-palette' ? $('#palette-input') : $(FOCUSABLE, m);
+            if (first) setTimeout(() => first.focus({ preventScroll: true }), 60);
         }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-            document.body.style.overflow = 'auto';
+        function closeModal(id, opts) {
+            const m = document.getElementById(id);
+            if (!m.classList.contains('open')) return;
+            m.classList.remove('open');
+            if (!$('.modal-overlay.open')) document.body.classList.remove('modal-open');
+            if (id === 'mobile-menu') { menuToggle.classList.remove('open'); menuToggle.setAttribute('aria-expanded', 'false'); }
+            if (id === 'case-modal' && location.hash.indexOf('#case/') === 0) history.replaceState(null, '', location.pathname + location.search);
+            if (!(opts && opts.noRestore) && m._returnFocus && m._returnFocus.focus) m._returnFocus.focus({ preventScroll: true });
         }
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        $$('[data-close]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.close)));
+        $$('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
         });
         document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') {
-                const open = document.querySelector('.modal-overlay.active');
-                if (open) { closeModal(open.id); if (open.id === 'mobile-menu') { menuToggle.classList.remove('active'); menuToggle.setAttribute('aria-expanded','false'); } }
+            const open = $$('.modal-overlay.open').pop();
+            if (!open) return;
+            if (e.key === 'Escape') { e.preventDefault(); closeModal(open.id); return; }
+            if (e.key === 'Tab') {
+                const items = $$(FOCUSABLE, open).filter(el => el.offsetParent !== null);
+                if (!items.length) return;
+                const first = items[0], last = items[items.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
             }
         });
 
+        /* ---------- MOBILE MENU ---------- */
+        menuToggle.addEventListener('click', () => {
+            const open = !menuToggle.classList.contains('open');
+            menuToggle.classList.toggle('open', open);
+            menuToggle.setAttribute('aria-expanded', open);
+            open ? openModal('mobile-menu') : closeModal('mobile-menu');
+        });
+        $$('[data-close-menu]').forEach(a => a.addEventListener('click', () => closeModal('mobile-menu', { noRestore: true })));
+
         /* ---------- BINARY RAIN ---------- */
-        const rainGroup = document.getElementById('binary-rain-group');
-        if (rainGroup && !prefersReducedMotion) {
+        const rainGroup = $('#binary-rain-group');
+        if (rainGroup && !prm) {
             let rainHTML = '';
-            const numCols = 20; const startX = 140;
+            const numCols = 20, startX = 140;
             for (let i = 0; i < numCols; i++) {
-                let x = startX + (i * 26);
-                let delay = (Math.random() * 5).toFixed(2);
-                let duration = (4 + Math.random() * 4).toFixed(2);
-                let opacity = (0.3 + Math.random() * 0.6).toFixed(2);
-                let fontSize = 16 + Math.floor(Math.random() * 6);
+                const x = startX + (i * 26);
+                const delay = (Math.random() * 5).toFixed(2);
+                const duration = (4 + Math.random() * 4).toFixed(2);
+                const opacity = (0.3 + Math.random() * 0.6).toFixed(2);
+                const fontSize = 16 + Math.floor(Math.random() * 6);
+                const len = 8 + Math.floor(Math.random() * 8);
                 let columnStr = '';
-                let len = 8 + Math.floor(Math.random() * 8);
                 for (let j = 0; j < len; j++) {
-                    let char = Math.random() > 0.5 ? '1' : '0';
-                    columnStr += '<tspan x="' + x + '" dy="' + (fontSize * 1.2) + '">' + char + '</tspan>';
+                    columnStr += '<tspan x="' + x + '" dy="' + (fontSize * 1.2) + '">' + (Math.random() > 0.5 ? '1' : '0') + '</tspan>';
                 }
                 rainHTML += '<text class="rain-drop" x="' + x + '" y="-200" fill="var(--cyan)" font-size="' + fontSize + '" opacity="' + opacity + '" style="animation: fall ' + duration + 's linear ' + delay + 's infinite;">' + columnStr + '</text>';
             }
             rainGroup.innerHTML = rainHTML;
         }
 
-        /* ---------- ABOUT TERMINAL ---------- */
-        const aboutTerminalLines = [
-            "> whoami", "ahmed_effat",
-            "> cat /career/objective.txt", "Target: SOC Intern / Junior SOC Analyst.",
-            "> ./check_status.sh", "[+] Strong foundation in network engineering.", "[+] Hands-on SIEM & PCAP analysis.", "[+] Ready for investigation."
-        ];
-        let aboutLine = 0, aboutChar = 0, aboutTypingStarted = false;
-        function typeAboutTerminal() {
-            const container = document.getElementById('about-terminal-content');
-            if (aboutLine < aboutTerminalLines.length) {
-                if (aboutChar === 0) {
-                    const div = document.createElement('div');
-                    div.className = 'terminal-line'; div.id = 'about-line-' + aboutLine;
-                    if (!aboutTerminalLines[aboutLine].startsWith(">")) { div.style.color = "#9CA3AF"; }
-                    container.appendChild(div);
-                }
-                if (aboutChar < aboutTerminalLines[aboutLine].length) {
-                    document.getElementById('about-line-' + aboutLine).textContent += aboutTerminalLines[aboutLine].charAt(aboutChar);
-                    aboutChar++; setTimeout(typeAboutTerminal, 30);
+        /* ---------- HERO ROLE ROTATOR ---------- */
+        (function () {
+            const el = $('#role-rotator');
+            const roles = ['SOC Intern | Junior SOC Analyst', 'Alert Triage & Log Analysis', 'Network Forensics & PCAP', 'Threat Detection & Incident Response'];
+            if (prm) return;
+            let r = 0, c = roles[0].length, deleting = true;
+            function tick() {
+                const word = roles[r];
+                if (deleting) {
+                    c--; el.textContent = word.slice(0, c);
+                    if (c === 0) { deleting = false; r = (r + 1) % roles.length; }
+                    setTimeout(tick, 28);
                 } else {
-                    aboutLine++; aboutChar = 0; setTimeout(typeAboutTerminal, 400);
+                    const next = roles[r];
+                    c++; el.textContent = next.slice(0, c);
+                    if (c === next.length) { deleting = true; setTimeout(tick, 2600); }
+                    else setTimeout(tick, 55);
                 }
             }
-        }
-
-        /* ---------- REVEAL ON SCROLL ---------- */
-        document.addEventListener("DOMContentLoaded", function () {
-            const revealElements = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right, .reveal-scale');
-            const revealOptions = { threshold: 0.15, rootMargin: "0px 0px -50px 0px" };
-            const revealOnScroll = new IntersectionObserver(function (entries, observer) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                        if (entry.target.id === 'about-terminal' && !aboutTypingStarted) {
-                            aboutTypingStarted = true; setTimeout(typeAboutTerminal, 500);
-                        }
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, revealOptions);
-            revealElements.forEach(el => { if (!el.classList.contains('active')) revealOnScroll.observe(el); });
-        });
+            setTimeout(tick, 3200);
+        })();
 
         /* ---------- CASE FILE DATABASE ---------- */
         const caseDatabase = {
             'INC-001': {
-                meta: 'CASE FILE // INC-001 | STATUS: CLOSED', title: 'Network Forensics — PCAP Investigation',
+                meta: 'CASE FILE // INC-001 | STATUS: CLOSED', title: 'Network Forensics — PCAP Investigation', sev: 'HIGH',
+                tools: ['Wireshark', 'VirusTotal'],
+                mitre: [['T1036', 'Masquerading'], ['T1021.002', 'SMB/Admin Shares'], ['T1071.001', 'Web Protocols'], ['T1041', 'Exfil Over C2']],
                 flow: [
                     { t: 'INITIAL SIGNAL', d: 'Suspicious network capture flagged for potential data exfiltration.' },
                     { t: 'DATA COLLECTION', d: 'Extracted PCAP loaded into Wireshark; correlated with VirusTotal.' },
@@ -1145,7 +1516,9 @@
                 ]
             },
             'LAB-002': {
-                meta: 'CASE FILE // LAB-002 | STATUS: ACTIVE', title: 'SOC Home Lab Deployment',
+                meta: 'CASE FILE // LAB-002 | STATUS: ACTIVE', title: 'SOC Home Lab Deployment', sev: 'LAB',
+                tools: ['Wazuh', 'Kali Linux', 'Windows'],
+                mitre: [],
                 flow: [
                     { t: 'INITIAL SIGNAL', d: 'Need for a practical environment to generate, observe, and analyze alerts.' },
                     { t: 'ACTION', d: 'Deployed Wazuh agents on Windows endpoints; executed simulated attacks via Kali Linux.' },
@@ -1155,7 +1528,9 @@
                 ]
             },
             'NET-003': {
-                meta: 'CASE FILE // NET-003 | STATUS: CLOSED', title: 'Network Security Architecture',
+                meta: 'CASE FILE // NET-003 | STATUS: CLOSED', title: 'Network Security Architecture', sev: 'DEFENSIVE',
+                tools: ['Cisco Packet Tracer', 'SSH', 'TACACS+', 'RADIUS', 'Syslog', 'NTP'],
+                mitre: [],
                 flow: [
                     { t: 'INITIAL SIGNAL', d: 'Requirement to design a resilient, defensive network topology.' },
                     { t: 'ACTION', d: 'Configured VLANs, STP, EtherChannel, NAT, OSPF, and extended ACLs.' },
@@ -1165,7 +1540,9 @@
                 ]
             },
             'REC-004': {
-                meta: 'CASE FILE // REC-004 | STATUS: CLOSED', title: 'Nmap Reconnaissance',
+                meta: 'CASE FILE // REC-004 | STATUS: CLOSED', title: 'Nmap Reconnaissance', sev: 'MEDIUM',
+                tools: ['Nmap', 'SIEM'],
+                mitre: [['T1595', 'Active Scanning'], ['T1046', 'Network Service Discovery']],
                 flow: [
                     { t: 'INITIAL SIGNAL', d: 'Understanding attacker network mapping techniques to defend against enumeration.' },
                     { t: 'ACTION', d: 'Executed TCP connect, SYN stealth, and UDP scans against authorized targets.' },
@@ -1178,80 +1555,402 @@
         const caseIds = Object.keys(caseDatabase);
         let currentCaseIndex = 0;
 
+        function el(tag, cls, text) {
+            const n = document.createElement(tag);
+            if (cls) n.className = cls;
+            if (text != null) n.textContent = text;
+            return n;
+        }
+
         function openCaseModal(caseId) {
             const data = caseDatabase[caseId]; if (!data) return;
             currentCaseIndex = caseIds.indexOf(caseId);
-            document.getElementById('case-meta').textContent = data.meta;
-            document.getElementById('case-title').textContent = data.title;
-            const contentDiv = document.getElementById('case-content');
-            contentDiv.innerHTML = '';
-            data.flow.forEach((step, index) => {
-                contentDiv.innerHTML += '<div class="case-step" style="opacity:0; animation: fadeInRight 0.5s forwards ' + (index * 0.1) + 's;">' +
-                    '<div class="meta-title">' + step.t + '</div><p>' + step.d + '</p></div>';
+            $('#case-meta').textContent = data.meta;
+            $('#case-title').textContent = data.title;
+
+            const header = $('#case-header');
+            header.replaceChildren();
+            const chips = el('div', 'case-chips');
+            chips.appendChild(el('span', 'chip', 'SEVERITY: ' + data.sev));
+            data.tools.forEach(t => chips.appendChild(el('span', 'chip tool', t)));
+            data.mitre.forEach(([id, name]) => {
+                const a = el('a', 'chip mitre', id + ' · ' + name);
+                a.href = 'https://attack.mitre.org/techniques/' + id.replace('.', '/') + '/';
+                a.target = '_blank'; a.rel = 'noopener';
+                chips.appendChild(a);
             });
-            document.getElementById('case-counter').textContent = 'CASE ' + (currentCaseIndex + 1) + ' / ' + caseIds.length;
-            document.getElementById('case-prev').disabled = currentCaseIndex === 0;
-            document.getElementById('case-next').disabled = currentCaseIndex === caseIds.length - 1;
+            header.appendChild(chips);
+            const share = el('button', 'case-share', '⧉ COPY LINK TO THIS CASE');
+            share.type = 'button';
+            share.addEventListener('click', () => copyText(location.href.split('#')[0] + '#case/' + caseId, '> CASE LINK COPIED'));
+            header.appendChild(share);
+
+            const contentDiv = $('#case-content');
+            contentDiv.replaceChildren();
+            data.flow.forEach((step, index) => {
+                const s = el('div', 'case-step');
+                s.style.animationDelay = (index * 0.08) + 's';
+                s.appendChild(el('div', 'meta-title', step.t));
+                s.appendChild(el('p', null, step.d));
+                contentDiv.appendChild(s);
+            });
+            $('#case-counter').textContent = 'CASE ' + (currentCaseIndex + 1) + ' / ' + caseIds.length;
+            $('#case-prev').disabled = currentCaseIndex === 0;
+            $('#case-next').disabled = currentCaseIndex === caseIds.length - 1;
+            history.replaceState(null, '', '#case/' + caseId);
             openModal('case-modal');
+            $('#case-modal .modal-content').scrollTop = 0;
         }
-        document.getElementById('case-prev').addEventListener('click', () => { if (currentCaseIndex > 0) openCaseModal(caseIds[currentCaseIndex - 1]); });
-        document.getElementById('case-next').addEventListener('click', () => { if (currentCaseIndex < caseIds.length - 1) openCaseModal(caseIds[currentCaseIndex + 1]); });
+        $('#case-prev').addEventListener('click', () => { if (currentCaseIndex > 0) openCaseModal(caseIds[currentCaseIndex - 1]); });
+        $('#case-next').addEventListener('click', () => { if (currentCaseIndex < caseIds.length - 1) openCaseModal(caseIds[currentCaseIndex + 1]); });
         document.addEventListener('keydown', e => {
-            if (!document.getElementById('case-modal').classList.contains('active')) return;
+            if (!$('#case-modal').classList.contains('open')) return;
             if (e.key === 'ArrowLeft' && currentCaseIndex > 0) openCaseModal(caseIds[currentCaseIndex - 1]);
             if (e.key === 'ArrowRight' && currentCaseIndex < caseIds.length - 1) openCaseModal(caseIds[currentCaseIndex + 1]);
         });
-        document.querySelectorAll('.project-card').forEach(card => {
+        $$('.project-card, .mitre-tech').forEach(card => {
             card.addEventListener('click', () => openCaseModal(card.dataset.case));
-            card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCaseModal(card.dataset.case); } });
+            if (card.classList.contains('project-card')) {
+                card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCaseModal(card.dataset.case); } });
+            }
         });
-    </script>
-    <script>
-        'use strict';
-        const prm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        // Deep link: #case/INC-001 opens that case on load
+        (function () {
+            const m = location.hash.match(/^#case\/([A-Z]+-\d+)$/i);
+            if (m && caseDatabase[m[1].toUpperCase()]) setTimeout(() => openCaseModal(m[1].toUpperCase()), 400);
+        })();
+
+        /* ---------- INTERACTIVE TERMINAL ---------- */
+        const termOut = $('#term-out'), termIn = $('#term-input'), termForm = $('#term-form');
+        const termHist = []; let histIdx = 0;
+        let introDone = false, introStarted = false, introTimer = null;
+        function tprint(text, cls) {
+            const d = el('div', 'term-line' + (cls ? ' ' + cls : ''), text);
+            termOut.appendChild(d);
+            termOut.scrollTop = termOut.scrollHeight;
+            return d;
+        }
+        const intro = [
+            ['> whoami', 'cmd'], ['ahmed_effat', 'dim'],
+            ['> cat /career/objective.txt', 'cmd'], ['Target: SOC Intern / Junior SOC Analyst.', 'dim'],
+            ['> ./check_status.sh', 'cmd'], ['[+] Strong foundation in network engineering.', 'ok'], ['[+] Hands-on SIEM & PCAP analysis.', 'ok'], ['[+] Ready for investigation.', 'ok'],
+            ["Terminal is interactive — type 'help' below.", 'dim']
+        ];
+        function runIntro() {
+            if (introStarted) return;
+            introStarted = true;
+            if (prm) return finishIntro();
+            let li = 0, ci = 0, line = null;
+            (function step() {
+                if (introDone) return;
+                if (li >= intro.length) { introDone = true; return; }
+                const [txt, cls] = intro[li];
+                if (ci === 0) line = tprint('', cls);
+                line.textContent = txt.slice(0, ++ci);
+                termOut.scrollTop = termOut.scrollHeight;
+                if (ci >= txt.length) { li++; ci = 0; introTimer = setTimeout(step, 320); }
+                else introTimer = setTimeout(step, 24);
+            })();
+        }
+        function finishIntro() {
+            if (introDone) return;
+            introDone = true; introStarted = true; clearTimeout(introTimer);
+            termOut.replaceChildren();
+            intro.forEach(([t, c]) => tprint(t, c));
+        }
+
+        const termCmds = {
+            help: () => ['Available commands:',
+                '  whoami        who is behind this terminal',
+                '  skills        tooling & evidence',
+                '  cases         list investigation case files',
+                '  open <id>     open a case file  (e.g. open INC-001)',
+                '  mitre         ATT&CK techniques investigated',
+                '  triage        jump to the triage challenge',
+                '  contact       ways to reach me',
+                '  cv            download my CV',
+                '  theme         toggle light/dark mode',
+                '  clear         clear the screen'],
+            whoami: () => ['Ahmed Mohamed Effat — CS @ Arab Open University, SOC / Blue Team track.', '"Validate the signal. Correlate the evidence. Build the story."'],
+            skills: () => ['[+] Wireshark      DNS, HTTP, SMB2, TLS, TCP streams       (hands-on)',
+                '[+] SIEM & EDR     Splunk, ELK, Security Onion, Velociraptor, Wazuh (hands-on)',
+                '[+] Network        Packet Tracer, Nmap, Suricata, Snort    (working)'],
+            cases: () => caseIds.map(id => '  ' + id.padEnd(10) + caseDatabase[id].title).concat(["Run 'open <id>' to view one."]),
+            open: args => {
+                const id = (args[0] || '').toUpperCase();
+                if (!caseDatabase[id]) return ['[!] usage: open <' + caseIds.join('|') + '>'];
+                setTimeout(() => openCaseModal(id), 350);
+                return ['[+] Decrypting case file ' + id + '...'];
+            },
+            mitre: () => {
+                const lines = [];
+                caseIds.forEach(id => caseDatabase[id].mitre.forEach(([t, n]) => lines.push('  ' + t.padEnd(11) + n.padEnd(26) + id)));
+                return lines;
+            },
+            triage: () => { setTimeout(() => $('#console').scrollIntoView({ behavior: prm ? 'auto' : 'smooth' }), 200); return ['[+] Routing you to the SOC console...']; },
+            contact: () => ['  email      ' + EMAIL, '  linkedin   linkedin.com/in/ahmed-mohammed-2e2', '  github     github.com/ahmedeffat6', '  tryhackme  tryhackme.com/p/3ffat0x'],
+            cv: () => { downloadCV(); return ['[+] Fetching cv.pdf...']; },
+            theme: () => { themeBtn.click(); return ['[+] Theme toggled.']; },
+            clear: () => { termOut.replaceChildren(); return []; },
+            history: () => termHist.map((h, i) => '  ' + String(i + 1).padStart(3) + '  ' + h),
+            date: () => [new Date().toUTCString()],
+            ls: () => ['case-files/   cv.pdf   objective.txt   mitre.json'],
+            cat: args => args[0] === 'objective.txt' ? ['Target: SOC Intern / Junior SOC Analyst.'] : ['[!] cat: ' + (args[0] || '') + ': No such file'],
+            sudo: () => ['[!] Permission denied. This attempt has been logged to the SIEM. ;)'],
+            matrix: () => { triggerMatrix(); return ['[+] Wake up, analyst...']; },
+            exit: () => ['There is no exit. Only more logs.']
+        };
+        function runCmd(raw) {
+            finishIntro();
+            const input = raw.trim();
+            tprint('soc@ae:~$ ' + input, 'cmd');
+            if (!input) return;
+            termHist.push(input); histIdx = termHist.length;
+            const [name, ...args] = input.split(/\s+/);
+            const fn = termCmds[name.toLowerCase()];
+            if (!fn) { tprint('command not found: ' + name + " — type 'help'", 'err'); return; }
+            fn(args).forEach(l => tprint(l, l.startsWith('[+]') ? 'ok' : l.startsWith('[!]') ? 'err' : 'dim'));
+        }
+        termForm.addEventListener('submit', e => { e.preventDefault(); runCmd(termIn.value); termIn.value = ''; });
+        termIn.addEventListener('focus', finishIntro);
+        termIn.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp' && termHist.length) { e.preventDefault(); histIdx = Math.max(0, histIdx - 1); termIn.value = termHist[histIdx]; }
+            else if (e.key === 'ArrowDown' && termHist.length) { e.preventDefault(); histIdx = Math.min(termHist.length, histIdx + 1); termIn.value = termHist[histIdx] || ''; }
+            else if (e.key === 'Tab' && termIn.value.trim()) {
+                const v = termIn.value.trim().toLowerCase();
+                const parts = v.split(/\s+/);
+                let opts;
+                if (parts.length === 1) opts = Object.keys(termCmds).filter(c => c.startsWith(v)).map(c => c + ' ');
+                else if (parts[0] === 'open') opts = caseIds.filter(id => id.toLowerCase().startsWith(parts[1])).map(id => 'open ' + id);
+                if (opts && opts.length) {
+                    e.preventDefault();
+                    if (opts.length === 1) termIn.value = opts[0];
+                    else tprint(opts.map(o => o.trim()).join('   '), 'dim');
+                }
+            }
+        });
+        $('#about-terminal').addEventListener('click', () => { if (!window.getSelection().toString()) termIn.focus({ preventScroll: true }); });
+
+        /* ---------- REVEAL ON SCROLL + TERMINAL + COUNTERS ---------- */
+        function countUp(node) {
+            const to = parseFloat(node.dataset.to), from = parseFloat(node.dataset.from || 0), dec = +(node.dataset.dec || 0);
+            const pre = node.dataset.pre || '', suf = node.dataset.suf || '';
+            const fmt = v => pre + v.toFixed(dec) + suf;
+            if (prm) { node.textContent = fmt(to); return; }
+            const dur = 1500, t0 = performance.now();
+            (function f(t) {
+                const p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+                node.textContent = fmt(from + (to - from) * e);
+                if (p < 1) requestAnimationFrame(f);
+            })(t0);
+        }
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                const t = entry.target;
+                t.classList.add('is-visible');
+                if (t.id === 'about-terminal') setTimeout(runIntro, 400);
+                $$('.stat-num', t).forEach(countUp);
+                observer.unobserve(t);
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+        $$('.reveal-up, .reveal-left, .reveal-right, .reveal-scale').forEach(n => revealObserver.observe(n));
+
+        /* ---------- SOC CONSOLE: SIMULATED ALERT FEED ---------- */
+        (function () {
+            const feed = $('#feed');
+            const SEV_COLOR = { CRITICAL: 'var(--sev-crit)', HIGH: 'var(--sev-high)', MEDIUM: 'var(--sev-med)', LOW: 'var(--sev-low)' };
+            const rules = [
+                ['CRITICAL', 'Credential dumping: LSASS memory access', 'T1003.001'],
+                ['CRITICAL', 'Executable disguised as image download', 'T1036.008'],
+                ['HIGH', 'Periodic beaconing to rare external host', 'T1071.001'],
+                ['HIGH', 'DNS query to DGA-like domain', 'T1568.002'],
+                ['HIGH', 'Privileged group membership changed', 'T1098'],
+                ['MEDIUM', 'RDP logon outside business hours', 'T1021.001'],
+                ['MEDIUM', 'New service installed on endpoint', 'T1543.003'],
+                ['MEDIUM', 'SMB share enumeration burst', 'T1135'],
+                ['LOW', 'Internal port scan detected', 'T1046'],
+                ['LOW', 'Self-signed TLS cert to rare host', 'T1573'],
+                ['LOW', 'USB mass storage mounted', 'T1052.001']
+            ];
+            const hosts = ['WS-FIN-07', 'DC01', 'HR-PC-12', 'SRV-WEB-02', 'LAPTOP-DEV-19', 'SRV-DB-01', 'WS-OPS-03', 'VPN-GW-01'];
+            const counts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+            const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+            let paused = false, visible = false, timer = null;
+
+            function push() {
+                const [sev, rule, tech] = pick(rules);
+                const status = sev === 'CRITICAL' ? 'ESCALATED' : pick(['NEW', 'TRIAGING', 'CLOSED · FP', 'CLOSED · BENIGN', 'ESCALATED']);
+                const li = document.createElement('li');
+                li.style.setProperty('--sc', SEV_COLOR[sev]);
+                const r1 = el('div', 'row1');
+                r1.append(el('span', 't', new Date().toISOString().substring(11, 19)), el('span', 's', sev), el('span', 'r', rule));
+                const r2 = el('div', 'row2');
+                r2.append(el('span', null, pick(hosts)), el('span', 'm', tech), el('span', 'st' + (status === 'ESCALATED' ? ' esc' : ''), status));
+                li.append(r1, r2);
+                feed.prepend(li);
+                while (feed.children.length > 9) feed.lastElementChild.remove();
+                counts[sev]++;
+                $('#c-' + sev).textContent = counts[sev];
+            }
+            function schedule() {
+                clearTimeout(timer);
+                if (paused || !visible || document.hidden || prm) return;
+                timer = setTimeout(() => { push(); schedule(); }, 1800 + Math.random() * 1800);
+            }
+            for (let i = 0; i < 6; i++) push();
+            new IntersectionObserver(es => { visible = es[0].isIntersecting; schedule(); }).observe(feed);
+            document.addEventListener('visibilitychange', schedule);
+            const toggle = $('#feed-toggle'), state = $('#feed-state');
+            toggle.addEventListener('click', () => {
+                paused = !paused;
+                toggle.textContent = paused ? 'RESUME' : 'PAUSE';
+                toggle.setAttribute('aria-pressed', paused);
+                state.textContent = paused ? '❚❚ PAUSED' : '● LIVE';
+                state.classList.toggle('paused', paused);
+                schedule();
+            });
+            if (prm) { state.textContent = '■ STATIC'; toggle.hidden = true; }
+        })();
+
+        /* ---------- SOC CONSOLE: TRIAGE CHALLENGE ---------- */
+        (function () {
+            const scenarios = [
+                {
+                    sev: 'HIGH', rule: 'Brute Force: Multiple Failed Logons', src: 'Windows Security · DC01',
+                    ev: ['48 × EventID 4625 for "administrator" in 120 s', 'Source: 10.0.5.23 (WS-FIN-07)', 'Followed by EventID 4624 (Logon Type 3) — SUCCESS', 'No admin activity or change ticket scheduled'],
+                    answer: 'tp', why: 'A burst of failures followed by a success from a workstation is a likely successful brute force (T1110). Escalate, isolate WS-FIN-07, and reset the account.'
+                },
+                {
+                    sev: 'MEDIUM', rule: 'Network Scan Detected (ET SCAN)', src: 'Suricata · core switch SPAN',
+                    ev: ['SYN packets to 1,024 ports across 10.0.2.0/24', 'Source: 10.0.1.50 (VULN-SCANNER-01)', 'Falls in the weekly scheduled scan window (Tue 02:00)', 'Approved change CHG-2291 on file'],
+                    answer: 'fp', why: 'The activity is real but authorised — a benign true positive. Document it, close it, and tune the rule to suppress the scanner during its window.'
+                },
+                {
+                    sev: 'HIGH', rule: 'File Type Mismatch on HTTP Download', src: 'Zeek http.log / files.log',
+                    ev: ['URI: /assets/invoice_0423.jpg', 'Content-Type header: image/jpeg', 'Magic bytes: 4D 5A ("MZ") — Windows PE executable', 'Domain registered 3 days ago, no reputation'],
+                    answer: 'tp', why: 'An executable masquerading as an image (T1036). Carve the file, hash it, check reputation, and block the domain — the same pattern investigated in INC-001.'
+                },
+                {
+                    sev: 'MEDIUM', rule: 'Suspicious PowerShell Execution', src: 'Sysmon EventID 1 · HR-PC-12',
+                    ev: ['powershell.exe -ExecutionPolicy Bypass -File inventory.ps1', 'Parent process: CcmExec.exe (SCCM client)', 'Script signed by the internal IT code-signing cert', 'Identical execution on 214 hosts at 09:00'],
+                    answer: 'fp', why: 'Parent process, valid signature and fleet-wide uniformity point to legitimate SCCM management. Close as benign — but verify the signature, never just the filename.'
+                }
+            ];
+            let idx = 0, score = 0, answered = false;
+            const results = [];
+            const btns = $$('.tri-btn'), result = $('#tri-result'), next = $('#tri-next');
+
+            function renderProgress() {
+                const p = $('#tri-progress'); p.replaceChildren();
+                scenarios.forEach((_, i) => p.appendChild(el('i', results[i] === true ? 'right' : results[i] === false ? 'wrong' : i === idx ? 'cur' : '')));
+                $('#tri-score').textContent = 'SCORE ' + score + ' / ' + results.length;
+            }
+            function render() {
+                const s = scenarios[idx];
+                answered = false;
+                $('#tri-count').textContent = 'ALERT ' + (idx + 1) + ' / ' + scenarios.length;
+                const sev = $('#tri-sev'); sev.textContent = s.sev; sev.className = 'sev-badge ' + s.sev;
+                $('#tri-src').textContent = s.src;
+                $('#tri-rule').textContent = s.rule;
+                const ev = $('#tri-evidence'); ev.replaceChildren();
+                s.ev.forEach(line => ev.appendChild(el('li', null, line)));
+                btns.forEach(b => { b.disabled = false; b.classList.remove('picked'); });
+                result.className = 'tri-result'; result.replaceChildren();
+                next.classList.remove('show'); next.textContent = 'NEXT ALERT >>';
+                renderProgress();
+            }
+            btns.forEach(b => b.addEventListener('click', () => {
+                if (answered) return;
+                answered = true;
+                const s = scenarios[idx], ok = b.dataset.verdict === s.answer;
+                if (ok) score++;
+                results[idx] = ok;
+                btns.forEach(x => x.disabled = true);
+                b.classList.add('picked');
+                result.className = 'tri-result show ' + (ok ? 'right' : 'wrong');
+                result.replaceChildren(el('strong', null, ok ? '✓ CORRECT CALL' : '✗ MISSED — ' + (s.answer === 'tp' ? 'THIS SHOULD BE ESCALATED' : 'THIS IS BENIGN')), document.createTextNode(s.why));
+                next.textContent = idx === scenarios.length - 1 ? 'SEE RESULTS >>' : 'NEXT ALERT >>';
+                next.classList.add('show');
+                renderProgress();
+            }));
+            let finished = false;
+            next.addEventListener('click', () => {
+                if (finished) { finished = false; idx = 0; score = 0; results.length = 0; render(); return; }
+                if (idx < scenarios.length - 1) { idx++; render(); return; }
+                finished = true;
+                const perfect = score === scenarios.length;
+                result.className = 'tri-result show ' + (perfect ? 'right' : 'wrong');
+                result.replaceChildren(
+                    el('strong', null, 'SHIFT COMPLETE // ' + score + ' / ' + scenarios.length + ' CORRECT'),
+                    document.createTextNode(perfect ? 'Clean shift. You read the evidence, not the alert title — that is the job.' : 'The alert title is a hypothesis; the evidence is the verdict. That is how I approach every queue.')
+                );
+                next.textContent = '↻ RESTART';
+            });
+            render();
+        })();
 
         /* ---------- COMMAND PALETTE (Ctrl+K) ---------- */
-        const palette = document.getElementById('command-palette');
-        const paletteInput = document.getElementById('palette-input');
-        const paletteResults = document.getElementById('palette-results');
+        const palette = $('#command-palette');
+        const paletteInput = $('#palette-input');
+        const paletteResults = $('#palette-results');
+        const goTo = id => () => { const t = document.getElementById(id); if (t) t.scrollIntoView({ behavior: prm ? 'auto' : 'smooth' }); };
         const commands = [
-            { label: 'Go to: Hero', ico: '⌂', action: () => location.hash = '#hero' },
-            { label: 'Go to: About', ico: '◫', action: () => location.hash = '#about' },
-            { label: 'Go to: Education', ico: '◫', action: () => location.hash = '#education' },
-            { label: 'Go to: Skills', ico: '◫', action: () => location.hash = '#skills' },
-            { label: 'Go to: Experience', ico: '◫', action: () => location.hash = '#experience' },
-            { label: 'Go to: Projects', ico: '◫', action: () => location.hash = '#projects' },
-            { label: 'Go to: Achievements', ico: '◫', action: () => location.hash = '#achievements' },
-            { label: 'Go to: Contact', ico: '◫', action: () => location.hash = '#contact' },
+            { label: 'Go to: Hero', ico: '⌂', action: goTo('hero') },
+            { label: 'Go to: About', ico: '◫', action: goTo('about') },
+            { label: 'Go to: Education', ico: '◫', action: goTo('education') },
+            { label: 'Go to: Skills', ico: '◫', action: goTo('skills') },
+            { label: 'Go to: Experience', ico: '◫', action: goTo('experience') },
+            { label: 'Go to: MITRE ATT&CK Coverage', ico: '◫', action: goTo('mitre') },
+            { label: 'Go to: SOC Console', ico: '◫', action: goTo('console') },
+            { label: 'Go to: Projects', ico: '◫', action: goTo('projects') },
+            { label: 'Go to: Achievements', ico: '◫', action: goTo('achievements') },
+            { label: 'Go to: Contact', ico: '◫', action: goTo('contact') },
+            { label: 'Start: Triage Challenge', ico: '⚠', action: goTo('console') },
+            { label: 'Open: Interactive Terminal', ico: '›_', action: () => { goTo('about')(); setTimeout(() => termIn.focus({ preventScroll: true }), prm ? 0 : 700); } },
             { label: 'Open Case: INC-001 — PCAP Investigation', ico: '▤', action: () => openCaseModal('INC-001') },
             { label: 'Open Case: LAB-002 — SOC Home Lab', ico: '▤', action: () => openCaseModal('LAB-002') },
             { label: 'Open Case: NET-003 — Network Architecture', ico: '▤', action: () => openCaseModal('NET-003') },
             { label: 'Open Case: REC-004 — Nmap Reconnaissance', ico: '▤', action: () => openCaseModal('REC-004') },
-            { label: 'Toggle Theme', ico: '◈', action: () => document.getElementById('theme-toggle').click() },
-            { label: 'Download CV', ico: '⬇', action: () => { const a = document.createElement('a'); a.href = 'cv/cv.pdf'; a.download = ''; a.click(); toast('> CV DOWNLOAD INITIATED'); } },
-            { label: 'Send Email', ico: '✉', action: () => location.href = 'mailto:ahmedeffat75@gmail.com' }
+            { label: 'Toggle Theme', ico: '◈', action: () => themeBtn.click() },
+            { label: 'Download CV', ico: '⬇', action: downloadCV },
+            { label: 'Copy Email Address', ico: '⧉', action: () => copyText(EMAIL, '> EMAIL COPIED: ' + EMAIL) },
+            { label: 'Send Email', ico: '✉', action: () => { location.href = 'mailto:' + EMAIL; } },
+            { label: 'Matrix Mode', ico: '◉', action: () => triggerMatrix() }
         ];
         let paletteIndex = 0, filtered = commands;
         function renderPalette() {
             const q = paletteInput.value.trim().toLowerCase();
-            filtered = commands.filter(c => c.label.toLowerCase().includes(q));
+            // every query word must appear somewhere in the label
+            const words = q.split(/\s+/).filter(Boolean);
+            filtered = commands.filter(c => words.every(w => c.label.toLowerCase().includes(w)));
             paletteIndex = 0;
-            paletteResults.innerHTML = filtered.length
-                ? filtered.map((c, i) => '<div class="palette-item' + (i === paletteIndex ? ' selected' : '') + '" data-i="' + i + '"><span class="pi-ico">' + c.ico + '</span><span>' + c.label + '</span></div>').join('')
-                : '<div class="palette-empty">NO MATCHING COMMANDS FOUND</div>';
-            paletteResults.querySelectorAll('.palette-item').forEach(el => el.addEventListener('click', () => { runPalette(+el.dataset.i); }));
+            paletteResults.replaceChildren();
+            if (!filtered.length) { paletteResults.appendChild(el('div', 'palette-empty', 'NO MATCHING COMMANDS FOUND')); return; }
+            filtered.forEach((c, i) => {
+                const item = el('div', 'palette-item' + (i === 0 ? ' selected' : ''));
+                item.setAttribute('role', 'option');
+                item.appendChild(el('span', 'pi-ico', c.ico));
+                item.appendChild(el('span', null, c.label));
+                item.addEventListener('click', () => runPalette(i));
+                item.addEventListener('mousemove', () => { if (paletteIndex !== i) { paletteIndex = i; renderPaletteSelection(); } });
+                paletteResults.appendChild(item);
+            });
         }
         function runPalette(i) {
             if (!filtered[i]) return;
-            closeModal('command-palette');
+            closeModal('command-palette', { noRestore: true });
             filtered[i].action();
         }
         function openPalette() {
             paletteInput.value = '';
             renderPalette();
             openModal('command-palette');
-            setTimeout(() => paletteInput.focus(), 100);
+        }
+        function renderPaletteSelection() {
+            $$('.palette-item', paletteResults).forEach((n, i) => n.classList.toggle('selected', i === paletteIndex));
+            const sel = $('.palette-item.selected', paletteResults);
+            if (sel) sel.scrollIntoView({ block: 'nearest' });
         }
         paletteInput.addEventListener('input', renderPalette);
         paletteInput.addEventListener('keydown', e => {
@@ -1259,71 +1958,80 @@
             else if (e.key === 'ArrowUp') { e.preventDefault(); paletteIndex = Math.max(paletteIndex - 1, 0); renderPaletteSelection(); }
             else if (e.key === 'Enter') { e.preventDefault(); runPalette(paletteIndex); }
         });
-        function renderPaletteSelection() {
-            paletteResults.querySelectorAll('.palette-item').forEach((el, i) => el.classList.toggle('selected', i === paletteIndex));
-            const sel = paletteResults.querySelector('.palette-item.selected');
-            if (sel) sel.scrollIntoView({ block: 'nearest' });
-        }
         document.addEventListener('keydown', e => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palette.classList.contains('active') ? closeModal('command-palette') : openPalette(); }
-            if (e.key === '/' && !/input|textarea/i.test(document.activeElement.tagName)) { e.preventDefault(); openPalette(); }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palette.classList.contains('open') ? closeModal('command-palette') : openPalette(); }
+            else if (e.key === '/' && !/input|textarea/i.test(document.activeElement.tagName) && !$('.modal-overlay.open')) { e.preventDefault(); openPalette(); }
         });
-        palette.addEventListener('click', e => { if (e.target === palette) closeModal('command-palette'); });
+        $('#palette-trigger').addEventListener('click', openPalette);
+
+        $('#copy-email').addEventListener('click', () => copyText(EMAIL, '> EMAIL COPIED: ' + EMAIL));
 
         /* ---------- CUSTOM CURSOR ---------- */
-        const dot = document.getElementById('cursor-dot');
-        const ring = document.getElementById('cursor-ring');
-        if (finePointer) {
-            document.body.style.cursor = 'none';
-            let mx = 0, my = 0, rx = 0, ry = 0;
-            document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.transform = 'translate(' + mx + 'px,' + my + 'px) translate(-50%,-50%)'; });
-            (function loop() { rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16; ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)'; requestAnimationFrame(loop); })();
-            document.querySelectorAll('a, button, .glow-card, .project-card, input, .inv-item span').forEach(el => {
-                el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
-                el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+        if (finePointer && !prm) {
+            const dot = $('#cursor-dot'), ring = $('#cursor-ring');
+            let mx = -100, my = -100, rx = -100, ry = -100, shown = false;
+            document.addEventListener('mousemove', e => {
+                mx = e.clientX; my = e.clientY;
+                if (!shown) { shown = true; rx = mx; ry = my; document.documentElement.classList.add('has-cursor'); }
+                dot.style.transform = 'translate(' + mx + 'px,' + my + 'px) translate(-50%,-50%)';
             });
+            document.addEventListener('mouseleave', () => { shown = false; document.documentElement.classList.remove('has-cursor'); });
+            (function loop() { rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18; ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)'; requestAnimationFrame(loop); })();
+            // Delegated so dynamically-added elements (feed, palette, case chips) get the hover state too
+            const HOVER = 'a, button, input, .glow-card, .project-card, .inv-item span, .palette-item, .terminal-box';
+            document.addEventListener('mouseover', e => ring.classList.toggle('hovering', !!e.target.closest(HOVER)));
         }
 
         /* ---------- SCROLL: PROGRESS, NAV, BACK-TO-TOP ---------- */
-        const progress = document.getElementById('scroll-progress');
-        const nav = document.getElementById('main-nav');
-        const backTop = document.getElementById('back-top');
+        const progress = $('#scroll-progress'), nav = $('#main-nav'), backTop = $('#back-top');
+        let scrollTicking = false;
         function onScroll() {
             const h = document.documentElement;
             const p = h.scrollTop / (h.scrollHeight - h.clientHeight);
             progress.style.transform = 'scaleX(' + (p || 0) + ')';
             nav.classList.toggle('scrolled', h.scrollTop > 40);
             backTop.classList.toggle('visible', h.scrollTop > 600);
+            scrollTicking = false;
         }
-        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('scroll', () => { if (!scrollTicking) { scrollTicking = true; requestAnimationFrame(onScroll); } }, { passive: true });
         onScroll();
         backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: prm ? 'auto' : 'smooth' }));
 
+        /* ---------- SCROLLSPY ---------- */
+        (function () {
+            const links = $$('.nav-links a');
+            const spy = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    if (!e.isIntersecting) return;
+                    links.forEach(a => a.classList.toggle('current', a.getAttribute('href') === '#' + e.target.id));
+                });
+            }, { rootMargin: '-45% 0px -50% 0px' });
+            $$('main section[id], footer[id]').forEach(s => spy.observe(s));
+        })();
+
         /* ---------- UTC CLOCK ---------- */
-        const clock = document.getElementById('utc-clock');
+        const clock = $('#utc-clock');
         (function tickClock() {
-            const d = new Date();
-            const t = d.toISOString().substring(11, 19);
-            clock.innerHTML = '<b>UTC</b> ' + t;
-            setTimeout(tickClock, 1000);
+            clock.innerHTML = '<b>UTC</b> ' + new Date().toISOString().substring(11, 19);
+            setTimeout(tickClock, 1000 - (Date.now() % 1000));
         })();
 
         /* ---------- MAGNETIC BUTTONS ---------- */
         if (finePointer && !prm) {
-            document.querySelectorAll('.btn, .social-link').forEach(el => {
-                el.addEventListener('mousemove', e => {
-                    const r = el.getBoundingClientRect();
+            $$('.btn, .social-link').forEach(b => {
+                b.addEventListener('mousemove', e => {
+                    const r = b.getBoundingClientRect();
                     const x = e.clientX - r.left - r.width / 2;
                     const y = e.clientY - r.top - r.height / 2;
-                    el.style.transform = 'translate(' + (x * 0.22) + 'px,' + (y * 0.3) + 'px)';
+                    b.style.transform = 'translate(' + (x * 0.22) + 'px,' + (y * 0.3) + 'px)';
                 });
-                el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+                b.addEventListener('mouseleave', () => { b.style.transform = ''; });
             });
         }
 
         /* ---------- CARD SPOTLIGHT + TILT ---------- */
         if (finePointer && !prm) {
-            document.querySelectorAll('.glow-card').forEach(card => {
+            $$('.glow-card').forEach(card => {
                 card.addEventListener('mousemove', e => {
                     const r = card.getBoundingClientRect();
                     const x = e.clientX - r.left, y = e.clientY - r.top;
@@ -1338,24 +2046,28 @@
         }
 
         /* ---------- BOOT SCREEN ---------- */
-        const bootScreen = document.getElementById('boot-screen');
-        const bootStatus = document.querySelector('.boot-status');
-        const bootMsgs = ['INITIALIZING SECURE SHELL...', 'LOADING CASE FILES...', 'CALIBRATING RADAR...', 'CONNECTION ESTABLISHED'];
-        let bmsg = 0;
-        const bootTimer = setInterval(() => {
-            bmsg++;
-            if (bootStatus) bootStatus.textContent = bootMsgs[Math.min(bmsg, bootMsgs.length - 1)];
-            if (bmsg >= bootMsgs.length - 1) clearInterval(bootTimer);
-        }, 380);
-        window.addEventListener('load', () => setTimeout(() => bootScreen.classList.add('hidden'), 1400));
-        setTimeout(() => bootScreen.classList.add('hidden'), 3200); // safety net
+        (function () {
+            const bootScreen = $('#boot-screen');
+            const booted = document.documentElement.classList.contains('booted');
+            const hide = () => { bootScreen.classList.add('hidden'); try { sessionStorage.setItem('ae-booted', '1'); } catch (e) {} };
+            if (booted || prm) { hide(); return; }
+            const bootStatus = $('.boot-status');
+            const bootMsgs = ['INITIALIZING SECURE SHELL...', 'LOADING CASE FILES...', 'CALIBRATING RADAR...', 'CONNECTION ESTABLISHED'];
+            let bmsg = 0;
+            const bootTimer = setInterval(() => {
+                bmsg++;
+                bootStatus.textContent = bootMsgs[Math.min(bmsg, bootMsgs.length - 1)];
+                if (bmsg >= bootMsgs.length - 1) clearInterval(bootTimer);
+            }, 320);
+            window.addEventListener('load', () => setTimeout(hide, 1200));
+            setTimeout(hide, 3000); // safety net
+        })();
 
         /* ---------- HEXAGON HONEYCOMB BACKGROUND ---------- */
         (function () {
-            const canvas = document.getElementById('hex-bg');
+            const canvas = $('#hex-bg');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const prm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
             let W = 0, H = 0, dpr = 1;
             let hexes = [];
@@ -1377,7 +2089,8 @@
                 };
             }
             let colors = getColors();
-            document.getElementById('theme-toggle').addEventListener('click', () => setTimeout(getColors, 80));
+            // Re-read the palette after a theme switch (previously the result was discarded)
+            themeListeners.push(() => { colors = getColors(); if (prm) frame(); });
 
             function buildGrid() {
                 dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1420,20 +2133,20 @@
                 const maxDist = 260, waveR = 190, ringBand = 110;
                 for (let i = 0; i < hexes.length; i++) {
                     const hx = hexes[i];
-                    let alpha = isLight ? 0.16 : 0.05;   // base visibility
+                    let alpha = isLight ? 0.16 : 0.05;
                     let r = colors.cyan.r, g = colors.cyan.g, b = colors.cyan.b;
 
-                    alpha += ((Math.sin(t * 2 + hx.phase) + 1) * 0.5) * 0.05;   // breathing twinkle
+                    alpha += ((Math.sin(t * 2 + hx.phase) + 1) * 0.5) * 0.05;
 
-                    const dm = Math.hypot(hx.x - mouse.x, hx.y - mouse.y);     // mouse glow
+                    const dm = Math.hypot(hx.x - mouse.x, hx.y - mouse.y);
                     if (dm < maxDist) { const m = 1 - dm / maxDist; alpha += m * m * 0.55; }
 
-                    const dw = Math.hypot(hx.x - wave.x, hx.y - wave.y);        // sweeping pulse ring
+                    const dw = Math.hypot(hx.x - wave.x, hx.y - wave.y);
                     const ringDelta = Math.abs(dw - waveR);
                     if (ringDelta < ringBand) {
                         const wv = 1 - ringDelta / ringBand;
                         alpha += wv * wv * 0.6;
-                        r = Math.round(r * (1 - wv) + colors.emerald.r * wv);  // shift to emerald
+                        r = Math.round(r * (1 - wv) + colors.emerald.r * wv);
                         g = Math.round(g * (1 - wv) + colors.emerald.g * wv);
                         b = Math.round(b * (1 - wv) + colors.emerald.b * wv);
                     }
@@ -1455,18 +2168,19 @@
 
             window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
             window.addEventListener('mouseout', e => { if (!e.relatedTarget) { mouse.x = -9999; mouse.y = -9999; } });
-            window.addEventListener('resize', buildGrid);
+            let resizeT;
+            window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { buildGrid(); if (prm) frame(); }, 120); });
             document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
 
             buildGrid();
-            frame();          // paints one frame (also the static render for reduced motion)
+            frame();
             start();
         })();
 
         /* ---------- KONAMI CODE → MATRIX RAIN ---------- */
         const konami = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
         let ki = 0;
-        const matrix = document.getElementById('matrix-canvas');
+        const matrix = $('#matrix-canvas');
         let matrixActive = false;
         document.addEventListener('keydown', e => {
             const k = e.key.toLowerCase();
@@ -1474,32 +2188,30 @@
             else ki = (k === konami[0]) ? 1 : 0;
         });
         function triggerMatrix() {
-            if (matrixActive) return;
+            if (matrixActive || prm) return;
             matrixActive = true;
-            matrix.classList.add('active');
+            matrix.classList.add('on');
             toast('> ACCESS GRANTED // MATRIX MODE');
             const ctx = matrix.getContext('2d');
             const w = matrix.width = innerWidth, h = matrix.height = innerHeight;
-            const cols = Math.floor(w / 16);
-            const drops = new Array(cols).fill(1);
+            const drops = new Array(Math.floor(w / 16)).fill(1);
             const chars = '01ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ';
-            let frame = 0;
+            let frameN = 0;
             (function draw() {
-                if (frame++ % 2 === 0) {
+                if (frameN++ % 2 === 0) {
                     ctx.fillStyle = 'rgba(7,10,15,0.08)';
                     ctx.fillRect(0, 0, w, h);
                     ctx.fillStyle = '#00E5FF';
                     ctx.font = '14px monospace';
                     for (let i = 0; i < drops.length; i++) {
-                        const text = chars[Math.floor(Math.random() * chars.length)];
-                        ctx.fillText(text, i * 16, drops[i] * 16);
+                        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 16, drops[i] * 16);
                         if (drops[i] * 16 > h && Math.random() > 0.975) drops[i] = 0;
                         drops[i]++;
                     }
                 }
                 matrixActive ? requestAnimationFrame(draw) : ctx.clearRect(0, 0, w, h);
             })();
-            setTimeout(() => { matrix.classList.remove('active'); setTimeout(() => { matrixActive = false; }, 700); }, 5000);
+            setTimeout(() => { matrix.classList.remove('on'); setTimeout(() => { matrixActive = false; }, 700); }, 5000);
         }
     </script>
 </body>
